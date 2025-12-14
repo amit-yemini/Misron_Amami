@@ -11,7 +11,7 @@ CREATE TABLE msa.launch_country (
     external_id  INTEGER
 );
 
-CREATE TABLE msa.missle_type (
+CREATE TABLE msa.missile_type (
     id           INTEGER PRIMARY KEY,
     name         TEXT NOT NULL,
     external_id  INTEGER
@@ -25,17 +25,17 @@ CREATE TABLE msa.alert_type (
     distribution_time   INTEGER
 );
 
-CREATE TABLE msa.alert_to_missle (
+CREATE TABLE msa.alert_to_missile (
     alert_type_id   INTEGER NOT NULL,
-    missle_type_id  INTEGER NOT NULL,
+    missile_type_id  INTEGER NOT NULL,
     
-    PRIMARY KEY (alert_type_id, missle_type_id),
+    PRIMARY KEY (alert_type_id, missile_type_id),
 
     FOREIGN KEY (alert_type_id)
         REFERENCES msa.alert_type(id)
         ON DELETE CASCADE,
 
-    FOREIGN KEY (missle_type_id)
-        REFERENCES msa.missle_type(id)
+    FOREIGN KEY (missile_type_id)
+        REFERENCES msa.missile_type(id)
         ON DELETE CASCADE
 );

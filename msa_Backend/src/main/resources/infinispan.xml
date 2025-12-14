@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<infinispan xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="urn:infinispan:config:14.0 https://infinispan.org/schemas/infinispan-config-14.0.xsd"
+            xmlns="urn:infinispan:config:14.0">
+
+    <jgroups>
+        <stack-file name="custom-transport" path="jgroups.xml"/>
+    </jgroups>
+
+    <cache-container name="cluster">
+        <transport cluster="cluster" stack="custom-transport"/>
+
+        <replicated-cache name="launch-country-cache">
+            <indexing enabled="true" storage="local-heap">
+                <indexed-entities>
+                    <indexed-entity>
+                        com.example.msa.entities.LaunchCountry
+                    </indexed-entity>
+                </indexed-entities>
+            </indexing>
+        </replicated-cache>
+        <replicated-cache name="alert-type-cache">
+            <indexing enabled="true" storage="local-heap">
+                <indexed-entities>
+                    <indexed-entity>
+                        com.example.msa.entities.AlertType
+                    </indexed-entity>
+                </indexed-entities>
+            </indexing>
+        </replicated-cache>
+        <replicated-cache name="missile-type-cache"><indexing enabled="true" storage="local-heap">
+            <indexed-entities>
+                <indexed-entity>
+                    com.example.msa.entities.AlertType
+                </indexed-entity>
+            </indexed-entities>
+        </indexing>
+        </replicated-cache>
+        <replicated-cache name="alert-to-missile-cache"/>
+
+        <distributed-cache name="alerts-cache"/>
+
+    </cache-container>
+</infinispan>
