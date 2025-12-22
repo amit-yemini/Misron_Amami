@@ -11,7 +11,6 @@ import org.infinispan.protostream.annotations.ProtoSchema;
                 AlertCategory.class,
                 AlertEvent.class,
                 MissileType.class,
-                AlertToMissile.class
         }
 )
 public interface MsaSchema extends GeneratedSchema {

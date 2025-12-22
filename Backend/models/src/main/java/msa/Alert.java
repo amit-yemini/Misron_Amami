@@ -5,19 +5,19 @@ import lombok.Data;
 
 @Data
 public class Alert {
-    @JsonProperty
+    @JsonProperty("incident")
     private int incidentId;
     @JsonProperty
     private int identifier;
     @JsonProperty
     private String sender;
-    @JsonProperty
+    @JsonProperty("sent")
     private long timeSent;
-    @JsonProperty
+    @JsonProperty("source")
     private int sourceId;
-    @JsonProperty
+    @JsonProperty("category")
     private AlertCategory category;
-    @JsonProperty
+    @JsonProperty("event")
     private AlertEvent event;
     @JsonProperty
     private int missileType;
@@ -25,8 +25,6 @@ public class Alert {
     private Launch launch;
     @JsonProperty
     private Impact impact;
-    @JsonProperty
-    private float azimuth;
 
     private int alertId;
     private boolean isManual = false;

@@ -11,17 +11,17 @@ import org.infinispan.protostream.annotations.ProtoField;
 @Entity
 @Indexed
 @Data
-public class LaunchCountry {
+public class LaunchCountry implements BaseEntity<Integer> {
     @Id
     @GeneratedValue
-    private int id;
+    private Integer id;
     @Column
     private String name;
     @Column
     private int externalId;
 
     @ProtoField(number = 1, defaultValue = "0")
-    public int getId() {
+    public Integer getId() {
         return id;
     }
     @ProtoField(2)

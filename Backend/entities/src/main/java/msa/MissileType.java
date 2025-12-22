@@ -1,25 +1,43 @@
 package msa;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.infinispan.api.annotations.indexing.Indexed;
 import org.infinispan.protostream.annotations.ProtoField;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Indexed
 @Data
-public class MissileType {
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
+public class MissileType implements BaseEntity<Integer> {
     @Id
-    private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
     @Column
     private String name;
     @Column
     private int externalId;
 
+    @ManyToMany(mappedBy = "relatedMissileTypes", fetch = FetchType.EAGER)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnoreProperties("relatedMissileTypes")
+    private Set<AlertType> relatedAlertTypes = new HashSet<>();
+
     @ProtoField(number = 1, defaultValue = "0")
-    public int getId() {
+    public Integer getId() {
         return id;
     }
     @ProtoField(2)

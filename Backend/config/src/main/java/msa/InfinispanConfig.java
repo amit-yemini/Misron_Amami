@@ -40,23 +40,7 @@ public class InfinispanConfig {
     }
 
     @Bean
-    public Cache<AlertToMissile, Object> alertToMissileCache(SpringEmbeddedCacheManager cacheManager) {
-        return cacheManager.getNativeCacheManager().getCache("alert-to-missile-cache");
-    }
-
-    @Bean
     public Cache<Integer, Alert> alertsCache(SpringEmbeddedCacheManager cacheManager) {
         return cacheManager.getNativeCacheManager().getCache("alerts-cache");
     }
-
-//    @ProtoSchema(includeClasses = {
-//            msa.LaunchCountry.class,
-//            msa.AlertType.class,
-//            msa.AlertCategory.class,
-//            msa.AlertEvent.class,
-//            msa.MissileType.class,
-//            msa.AlertToMissile.class
-//    })
-//    public interface msa.MsaSchema extends GeneratedSchema {
-//    }
 }

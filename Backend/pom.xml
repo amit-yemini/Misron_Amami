@@ -27,7 +27,7 @@
         <module>services</module>
         <module>controllers</module>
         <module>exceptions</module>
-        <module>application</module>
+        <module>config</module>
     </modules>
     <dependencyManagement>
         <dependencies>

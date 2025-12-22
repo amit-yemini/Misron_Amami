@@ -15,4 +15,6 @@ public class Impact {
     private float ellipseA;
     @JsonProperty
     private float ellipseB;
+    @JsonProperty("azimut")
+    private float azimuth;
 }

@@ -29,6 +29,16 @@
             <artifactId>infinispan-commons</artifactId>
             <version>15.0.4.Final</version>
         </dependency>
+        <dependency>
+            <groupId>org.infinispan</groupId>
+            <artifactId>infinispan-query</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.infinispan</groupId>
+            <artifactId>infinispan-core</artifactId>
+            <version>16.0.2</version>
+        </dependency>
 
         <dependency>
             <groupId>org.idf</groupId>

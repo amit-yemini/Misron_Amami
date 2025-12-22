@@ -17,12 +17,13 @@ public class AlertService {
     @Autowired
     private Cache<Integer, MissileType> missileTypeCache;
     @Autowired
-    private Cache<AlertToMissile, Object> alertToMissileCache;
-    @Autowired
     private Cache<Integer, Alert> alertCache;
 
     public void newAlert(Alert alert) throws NotFoundException, InvalidSenderException {
         sanityCheck(alert);
+        additionalCheck(alert);
+        alertCache.put(alert.getIncidentId(), alert);
+
     }
 
     private void sanityCheck(Alert alert) throws NotFoundException, InvalidSenderException {
@@ -39,18 +40,20 @@ public class AlertService {
     }
 
     private void launchCountryCheck(int externalId) throws NotFoundException {
-        Query<LaunchCountry> query = launchCountryCache.query(
-                "FROM msa.LaunchCountry " +
-                "WHERE externalId = :externalId");
+//        Query<LaunchCountry> query = launchCountryCache.query(
+//                "FROM msa.LaunchCountry " +
+//                "WHERE externalId = :externalId");
+//
+//        query.setParameter("externalId", externalId);
+//        List<LaunchCountry> found = query.execute().list();
+//
+//        if (found.isEmpty()) {
+//            throw new NotFoundException("msa.Launch Country with external id " + externalId + " not found");
+//        }
+//
+//        System.out.println("launch country id: " + found.get(0).getId());
 
-        query.setParameter("externalId", externalId);
-        List<LaunchCountry> found = query.execute().list();
 
-        if (found.isEmpty()) {
-            throw new NotFoundException("msa.Launch Country with external id " + externalId + " not found");
-        }
-
-        System.out.println("launch country id: " + found.get(0).getId());
     }
 
     private int getAlertType(AlertCategory category, AlertEvent event) throws NotFoundException {
@@ -89,9 +92,12 @@ public class AlertService {
 
         int missileId = found.get(0).getId();
         System.out.println(missileId);
-        AlertToMissile combination = new AlertToMissile(alertId, missileId);
 
-        if (!alertToMissileCache.containsKey(combination)) {
+        boolean doesCombinationExists = alertTypeCache.get(alertId).getRelatedMissileTypes()
+                .stream()
+                .map(MissileType::getId).toList().contains(missileId);
+
+        if (!doesCombinationExists) {
             throw new NotFoundException("alert and missile combination doesn't exists");
         }
     }

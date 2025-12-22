@@ -17,8 +17,6 @@ public class LaunchCountryController {
     private Cache<Integer, AlertType> alertTypeCache;
     @Autowired
     private Cache<Integer, MissileType> missileTypeCache;
-    @Autowired
-    private Cache<AlertToMissile, Object> alertToMissileCache;
 
     @GetMapping("countries")
     public ResponseEntity<Object> getCountries() {
@@ -32,11 +30,7 @@ public class LaunchCountryController {
 
     @GetMapping("missiles")
     public ResponseEntity<Object> getMissiles() {
+        System.out.println(missileTypeCache);
         return new ResponseEntity<>(missileTypeCache, HttpStatus.OK);
-    }
-
-    @GetMapping("alert-to-missile")
-    public ResponseEntity<Object> getAlertToMissiles() {
-        return new ResponseEntity<>(alertToMissileCache, HttpStatus.OK);
     }
 }
