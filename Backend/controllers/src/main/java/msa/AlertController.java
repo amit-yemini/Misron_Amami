@@ -16,7 +16,7 @@ public class AlertController {
 
     @PostMapping("/in")
     public ResponseEntity<Object> newAlert(@RequestBody Alert alert) {
-        alertService.newAlert(alert);
+        alertService.processAlert(alert);
         return new ResponseEntity<>("Alert in", HttpStatus.OK);
     }
 }

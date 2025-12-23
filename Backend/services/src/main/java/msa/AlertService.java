@@ -1,5 +1,6 @@
 package msa;
 
+import lombok.extern.slf4j.Slf4j;
 import org.infinispan.Cache;
 import org.infinispan.commons.api.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import java.time.DateTimeException;
 import java.time.Instant;
 import java.util.List;
 
+@Slf4j
 @Service
 public class AlertService {
     @Autowired
@@ -19,41 +21,60 @@ public class AlertService {
     @Autowired
     private Cache<Integer, Alert> alertCache;
 
-    public void newAlert(Alert alert) throws NotFoundException, InvalidSenderException {
+    public void processAlert(Alert alert) throws NotFoundException, InvalidSenderException {
         sanityCheck(alert);
         additionalCheck(alert);
         alertCache.put(alert.getIncidentId(), alert);
 
+        final int INTERVENTION_TIME = calculateInterventionTime(alert.getImpact().getTime(),
+                alert.getAlertTypeId());
+
+        if (INTERVENTION_TIME <= 0) {
+            distribute(new AlertDistribution(alert));
+        } else {
+            sendToClient(new AlertDistribution(alert));
+        }
+    }
+
+    private void distribute(AlertDistribution alertDistribution) {}
+
+    private void sendToClient(AlertDistribution alertDistribution) {}
+
+    private int calculateInterventionTime(long impactTime, int alertTypeId) {
+        Query<AlertType> query = alertTypeCache.query("FROM msa.AlertType WHERE id = :id");
+        query.setParameter("id", alertTypeId);
+        AlertType alertType = query.execute().list().getFirst();
+        int distributionTime = alertType.getDistributionTime();
+
+        return Math.toIntExact(impactTime - Instant.now().getEpochSecond() - distributionTime);
     }
 
     private void sanityCheck(Alert alert) throws NotFoundException, InvalidSenderException {
         launchCountryCheck(alert.getSourceId());
-        alert.setAlertId(getAlertType(alert.getCategory(), alert.getEvent()));
-        checkAlertToMissileMatch(alert.getAlertId(), alert.getMissileType());
+        alert.setAlertTypeId(getAlertType(alert.getCategory(), alert.getEvent()));
+        checkAlertToMissileMatch(alert.getAlertTypeId(), alert.getMissileType());
         checkSender(alert.getSender());
     }
 
     private void additionalCheck(Alert alert) throws AlertDiscreditedException {
         checkSendTime(alert.getTimeSent());
         checkImpactTime(alert.getImpact().getTime());
-        checkAlertDiscredit(alert.getIncidentId());
+        checkAlertRelevance(alert.getIncidentId());
     }
 
     private void launchCountryCheck(int externalId) throws NotFoundException {
-//        Query<LaunchCountry> query = launchCountryCache.query(
-//                "FROM msa.LaunchCountry " +
-//                "WHERE externalId = :externalId");
-//
-//        query.setParameter("externalId", externalId);
-//        List<LaunchCountry> found = query.execute().list();
-//
-//        if (found.isEmpty()) {
-//            throw new NotFoundException("msa.Launch Country with external id " + externalId + " not found");
-//        }
-//
-//        System.out.println("launch country id: " + found.get(0).getId());
+        Query<LaunchCountry> query = launchCountryCache.query(
+                "FROM msa.LaunchCountry " +
+                "WHERE externalId = :externalId");
 
+        query.setParameter("externalId", externalId);
+        List<LaunchCountry> found = query.execute().list();
 
+        if (found.isEmpty()) {
+            throw new NotFoundException("msa.Launch Country with external id " + externalId + " not found");
+        }
+
+        log.info("launch country id: {}", found.getFirst().getId());
     }
 
     private int getAlertType(AlertCategory category, AlertEvent event) throws NotFoundException {
@@ -74,8 +95,9 @@ public class AlertService {
                     " not found");
         }
 
-        System.out.println("alert type id: " + found.get(0).getId());
-        return found.get(0).getId();
+        log.info("alert type id: {}", found.getFirst().getId());
+
+        return found.getFirst().getId();
     }
 
     private void checkAlertToMissileMatch(int alertId, int externalMissileId) throws NotFoundException {
@@ -91,13 +113,12 @@ public class AlertService {
         }
 
         int missileId = found.get(0).getId();
-        System.out.println(missileId);
+        log.info("missile id: {}", missileId);
 
-        boolean doesCombinationExists = alertTypeCache.get(alertId).getRelatedMissileTypes()
-                .stream()
-                .map(MissileType::getId).toList().contains(missileId);
+        boolean doesCombinationExist = alertTypeCache.get(alertId).getRelatedMissileTypes()
+                .contains(new MissileType(missileId));
 
-        if (!doesCombinationExists) {
+        if (!doesCombinationExist) {
             throw new NotFoundException("alert and missile combination doesn't exists");
         }
     }
@@ -120,7 +141,7 @@ public class AlertService {
         }
     }
 
-    private void checkAlertDiscredit(int incidentId) throws AlertDiscreditedException {
+    private void checkAlertRelevance(int incidentId) throws AlertDiscreditedException {
         if (alertCache.containsKey(incidentId)) {
             Alert previousAlert = alertCache.get(incidentId);
             if (previousAlert.isManual() || previousAlert.isCancelled()) {

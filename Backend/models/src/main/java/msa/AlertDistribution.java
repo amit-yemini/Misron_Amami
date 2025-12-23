@@ -4,10 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.Data;
 
-@Data
-public class Alert {
+public class AlertDistribution {
     @JsonProperty("incident")
     @NotNull
     @Positive
@@ -16,9 +14,6 @@ public class Alert {
     @NotNull
     @Positive
     private Integer identifier;
-    @JsonProperty
-    @NotNull
-    private String sender;
     @JsonProperty("sent")
     @NotNull
     private Long timeSent;
@@ -26,14 +21,10 @@ public class Alert {
     @NotNull
     @Positive
     private Integer sourceId;
-    @JsonProperty("category")
+    @JsonProperty("alertType")
     @NotNull
-    @Valid
-    private AlertCategory category;
-    @JsonProperty("event")
-    @NotNull
-    @Valid
-    private AlertEvent event;
+    @Positive
+    private Integer alertTypeId;
     @JsonProperty
     @NotNull
     @Positive
@@ -41,13 +32,15 @@ public class Alert {
     @JsonProperty
     @NotNull
     @Valid
-    private Launch launch;
-    @JsonProperty
-    @NotNull
-    @Valid
     private Impact impact;
 
-    private int alertTypeId;
-    private boolean isManual = false;
-    private boolean isCancelled = false;
+    public AlertDistribution(Alert alert) {
+        this.incidentId = alert.getIncidentId();
+        this.identifier = alert.getIdentifier();
+        this.timeSent = alert.getTimeSent();
+        this.sourceId = alert.getSourceId();
+        this.alertTypeId = alert.getAlertTypeId();
+        this.missileType = alert.getMissileType();
+        this.impact = alert.getImpact();
+    }
 }

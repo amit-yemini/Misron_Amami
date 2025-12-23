@@ -18,7 +18,6 @@ public class InfinispanConfig {
         return new SpringEmbeddedCacheManager(cacheManager);
     }
 
-    // TODO: FIX THIS - PROBABLY CAUSES THE CONTEST INITIALIZER ERROR
     @Bean
     public SerializationContextInitializer msaSchema() {
         return new MsaSchemaImpl();

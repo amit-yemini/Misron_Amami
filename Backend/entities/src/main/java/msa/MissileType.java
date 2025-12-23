@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.infinispan.api.annotations.indexing.Indexed;
 import org.infinispan.protostream.annotations.ProtoField;
@@ -17,12 +18,15 @@ import java.util.Set;
 @Entity
 @Indexed
 @Data
+@NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "id"
 )
 public class MissileType implements BaseEntity<Integer> {
     @Id
+    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Column
@@ -32,7 +36,6 @@ public class MissileType implements BaseEntity<Integer> {
 
     @ManyToMany(mappedBy = "relatedMissileTypes", fetch = FetchType.EAGER)
     @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     @JsonIgnoreProperties("relatedMissileTypes")
     private Set<AlertType> relatedAlertTypes = new HashSet<>();
 
@@ -47,5 +50,9 @@ public class MissileType implements BaseEntity<Integer> {
     @ProtoField(number = 3, defaultValue = "0")
     public int getExternalId() {
         return externalId;
+    }
+
+    public MissileType(Integer id) {
+        this.id = id;
     }
 }
