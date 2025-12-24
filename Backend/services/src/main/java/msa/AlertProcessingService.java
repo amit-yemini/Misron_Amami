@@ -22,6 +22,9 @@ public class AlertProcessingService implements AlertProcessingActions{
     @Autowired
     private AlertStateCacheService alertStateCacheService;
 
+    @Autowired
+    private SocketIOSender socketIOSender;
+
     private final ScheduledExecutorService scheduler =
             Executors.newScheduledThreadPool(2);
 
@@ -43,6 +46,7 @@ public class AlertProcessingService implements AlertProcessingActions{
 
     public void sendToClients(AlertDistribution alertDistribution) {
         System.out.println("sending to clients");
+        socketIOSender.sendToAll(alertDistribution);
     }
 
     public int calculateInterventionTime(long impactTime, int alertTypeId) {
