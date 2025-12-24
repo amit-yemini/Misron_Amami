@@ -46,7 +46,7 @@ public class AlertStateMachine {
 
         config.configure(State.WAITING)
                 .onEntry(() -> {
-                    alertProcessing.sendToClients(new AlertDistribution(alert));
+                    alertProcessing.sendAlertToClients(new AlertDistribution(alert));
                     int delaySeconds = alertProcessing.calculateInterventionTime(
                             alert.getImpact().getTime(),
                             alert.getAlertTypeId()
@@ -54,10 +54,27 @@ public class AlertStateMachine {
 
                     alertProcessing.scheduleWaitExpired(alert, delaySeconds);
                 })
-                .permit(Trigger.WAIT_EXPIRED, State.DISTRIBUTION);
+                .permit(Trigger.WAIT_EXPIRED, State.DISTRIBUTION)
+                .permit(Trigger.INVALID, State.INVALIDATED);
 
         config.configure(State.DISTRIBUTION)
-                .onEntry(() -> alertProcessing.distribute(new AlertDistribution(alert)));
+                .onEntryFrom(Trigger.DISTRIBUTE, () -> {
+                    alertProcessing.distribute(new AlertDistribution(alert));
+                    machine.fire(Trigger.INVALID);
+                })
+                .onEntryFrom(Trigger.WAIT_EXPIRED, () -> {
+                    alertProcessing.sendCancellationToClients(alert.getIncidentId());
+                    alertProcessing.distribute(new AlertDistribution(alert));
+                    machine.fire(Trigger.INVALID);
+                })
+                .permit(Trigger.INVALID, State.INVALIDATED);
+
+        config.configure(State.INVALIDATED)
+                .ignore(Trigger.START)
+                .ignore(Trigger.VALIDATED)
+                .ignore(Trigger.WAIT_EXPIRED)
+                .ignore(Trigger.DISTRIBUTE)
+                .ignore(Trigger.INVALID);
 
         return config;
     }

@@ -29,6 +29,8 @@ public class AlertProcessingService implements AlertProcessingActions{
             Executors.newScheduledThreadPool(2);
 
     public void scheduleWaitExpired(Alert alert, int delaySeconds) {
+        log.info("scheduling wait period of {} seconds for alert: incident: {}, identifier: {}",
+        delaySeconds, alert.getIncidentId(), alert.getIdentifier());
         scheduler.schedule(
                 () -> onWaitExpired(alert), delaySeconds, TimeUnit.SECONDS
         );
@@ -44,9 +46,15 @@ public class AlertProcessingService implements AlertProcessingActions{
         System.out.println("distributing alert");
     }
 
-    public void sendToClients(AlertDistribution alertDistribution) {
-        System.out.println("sending to clients");
-        socketIOSender.sendToAll(alertDistribution);
+    public void sendAlertToClients(AlertDistribution alertDistribution) {
+        log.info("sending alert to clients");
+        socketIOSender.sendAlertToAll(alertDistribution);
+    }
+
+    @Override
+    public void sendCancellationToClients(int incidentId) {
+        log.info("sending cancellation to clients");
+        socketIOSender.sendCancellationToAll(incidentId);
     }
 
     public int calculateInterventionTime(long impactTime, int alertTypeId) {
@@ -56,6 +64,8 @@ public class AlertProcessingService implements AlertProcessingActions{
     }
 
     public void sanityCheck(Alert alert) throws NotFoundException, InvalidSenderException {
+        log.info("starting sanity check for alert: incident: {}, identifier: {}",
+                alert.getIncidentId(), alert.getIdentifier());
         launchCountryCheck(alert.getSourceId());
         alert.setAlertTypeId(getAlertType(alert.getCategory(), alert.getEvent()));
         checkAlertToMissileMatch(alert.getAlertTypeId(), alert.getMissileType());
@@ -63,6 +73,8 @@ public class AlertProcessingService implements AlertProcessingActions{
     }
 
     public void additionalCheck(Alert alert) throws AlertDiscreditedException {
+        log.info("starting additional check for alert: incident: {}, identifier: {}",
+                alert.getIncidentId(), alert.getIdentifier());
         checkSendTime(alert.getTimeSent());
         checkImpactTime(alert.getImpact().getTime());
         checkAlertRelevance(alert.getIncidentId());

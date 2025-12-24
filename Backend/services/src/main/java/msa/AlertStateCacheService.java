@@ -10,12 +10,15 @@ public class AlertStateCacheService{
     private Cache<Integer, AlertStateMachine> alertStateMachineCache;
 
     public void addAlertStateMachine(int key, AlertStateMachine alertStateMachine) {
+        if (alertStateMachineCache.containsKey(key)) {
+            alertStateMachineCache.get(key).fire(Trigger.INVALID);
+        }
         alertStateMachineCache.put(key, alertStateMachine);
     }
 
     public void checkAlertRelevance(int incidentId) {
         if (alertStateMachineCache.containsKey(incidentId)) {
-            if (alertStateMachineCache.get(incidentId).getState() == State.DISTRIBUTION) {
+            if (alertStateMachineCache.get(incidentId).getState() == State.INVALIDATED) {
                 throw new AlertDiscreditedException(incidentId);
             }
         }

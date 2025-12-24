@@ -5,5 +5,6 @@ public enum State {
     SANITY_CHECK,
     ADDITIONAL_CHECK,
     WAITING,
-    DISTRIBUTION
+    DISTRIBUTION,
+    INVALIDATED
 }

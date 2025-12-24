@@ -9,7 +9,11 @@ public class SocketIOSender {
     @Autowired
     private SocketIOServer server;
 
-    public void sendToAll(AlertDistribution alertDistribution) {
+    public void sendAlertToAll(AlertDistribution alertDistribution) {
        server.getBroadcastOperations().sendEvent("alert", alertDistribution);
+    }
+
+    public void sendCancellationToAll(int incidentId) {
+        server.getBroadcastOperations().sendEvent("cancel", incidentId);
     }
 }

@@ -6,6 +6,7 @@ public interface AlertProcessingActions {
     int calculateInterventionTime(long impactTime, int alertTypeId);
     void scheduleWaitExpired(Alert alert, int delaySeconds);
     void distribute(AlertDistribution distribution);
-    void sendToClients(AlertDistribution alert);
+    void sendAlertToClients(AlertDistribution alert);
+    void sendCancellationToClients(int incidentId);
     void addAlertStateMachine(int incidentId, AlertStateMachine stateMachine);
 }
