@@ -1,6 +1,5 @@
 package msa;
 
-import msa.MsaSchemaImpl;
 import org.infinispan.Cache;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.protostream.SerializationContextInitializer;
@@ -39,7 +38,7 @@ public class InfinispanConfig {
     }
 
     @Bean
-    public Cache<Integer, Alert> alertsCache(SpringEmbeddedCacheManager cacheManager) {
-        return cacheManager.getNativeCacheManager().getCache("alerts-cache");
+    public Cache<Integer, AlertStateMachine> alertStateMachineCache(SpringEmbeddedCacheManager cacheManager) {
+        return cacheManager.getNativeCacheManager().getCache("alert-state-machine-cache");
     }
 }

@@ -30,6 +30,7 @@
         <module>controllers</module>
         <module>exceptions</module>
         <module>config</module>
+        <module>stateMachines</module>
     </modules>
     <dependencyManagement>
         <dependencies>

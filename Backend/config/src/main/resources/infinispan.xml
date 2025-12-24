@@ -38,7 +38,7 @@
             </indexing>
         </replicated-cache>
 
-        <distributed-cache name="alerts-cache"/>
+        <distributed-cache name="alert-state-machine-cache"/>
 
     </cache-container>
 </infinispan>
