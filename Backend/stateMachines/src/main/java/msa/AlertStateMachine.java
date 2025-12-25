@@ -21,11 +21,12 @@ public class AlertStateMachine {
         StateMachineConfig<State, Trigger> config = new StateMachineConfig<>();
 
         config.configure(State.INITIAL)
-                .permit(Trigger.START, State.SANITY_CHECK);
+                .permit(Trigger.START_AUTO, State.SANITY_CHECK)
+                .permit(Trigger.START_MANUAL, State.DISTRIBUTION);
 
         config.configure(State.SANITY_CHECK)
                 .onEntryFrom(
-                        Trigger.START,
+                        Trigger.START_AUTO,
                         () -> {
                             alertProcessing.sanityCheck(alert);
                             machine.fire(Trigger.VALIDATED);
@@ -70,7 +71,7 @@ public class AlertStateMachine {
                 .permit(Trigger.INVALID, State.INVALIDATED);
 
         config.configure(State.INVALIDATED)
-                .ignore(Trigger.START)
+                .ignore(Trigger.START_AUTO)
                 .ignore(Trigger.VALIDATED)
                 .ignore(Trigger.WAIT_EXPIRED)
                 .ignore(Trigger.DISTRIBUTE)

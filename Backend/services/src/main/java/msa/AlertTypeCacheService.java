@@ -13,6 +13,7 @@ public class AlertTypeCacheService {
     private Cache<Integer, AlertType> alertTypeCache;
 
     public AlertType getAlertTypeByCategoryAndEvent(AlertCategory category, AlertEvent event) {
+        List<AlertType> found;
         Query<AlertType> query = alertTypeCache.query(
                 "FROM msa.AlertType " +
                         "WHERE category = :category AND event = :event");
@@ -20,7 +21,7 @@ public class AlertTypeCacheService {
         query.setParameter("category", category);
         query.setParameter("event", event);
 
-        List<AlertType> found = query.execute().list();
+        found = query.execute().list();
 
         if (found.isEmpty()) {
             throw new NotFoundException("msa.Alert Type with category "

@@ -23,6 +23,9 @@ public class AlertProcessingService implements AlertProcessingActions{
     private AlertStateCacheService alertStateCacheService;
 
     @Autowired
+    private ApiService apiService;
+
+    @Autowired
     private SocketIOSender socketIOSender;
 
     private final ScheduledExecutorService scheduler =
@@ -43,7 +46,8 @@ public class AlertProcessingService implements AlertProcessingActions{
     }
 
     public void distribute(AlertDistribution alertDistribution) {
-        System.out.println("distributing alert");
+        log.info("distributing alert: {}", alertDistribution.getIncidentId());
+        apiService.sendRequest(alertDistribution);
     }
 
     public void sendAlertToClients(AlertDistribution alertDistribution) {

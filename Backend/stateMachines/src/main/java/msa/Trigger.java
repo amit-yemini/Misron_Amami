@@ -1,7 +1,8 @@
 package msa;
 
 public enum Trigger {
-    START,
+    START_AUTO,
+    START_MANUAL,
     VALIDATED,
     WAIT_EXPIRED,
     DISTRIBUTE,

@@ -14,6 +14,6 @@ public class AlertService {
         AlertStateMachine stateMachine =
                 new AlertStateMachine(alertProcessingService, alert);
 
-        stateMachine.fire(Trigger.START);
+        stateMachine.fire(Trigger.START_AUTO);
     }
 }
