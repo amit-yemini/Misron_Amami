@@ -7,15 +7,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 @Service
-public class ApiService {
+public class ZofarimService {
     @Autowired
-    private RestClient restClient;
+    private RestClient zofarim;
 
     @Value("${dist.uri}")
     private String uri;
 
     public void sendRequest(AlertDistribution alertDistribution) {
-        restClient.post()
+        zofarim.post()
                 .uri(uri)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(alertDistribution)

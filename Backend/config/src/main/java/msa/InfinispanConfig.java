@@ -1,5 +1,6 @@
 package msa;
 
+import com.github.oxo42.stateless4j.StateMachine;
 import org.infinispan.Cache;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.protostream.SerializationContextInitializer;
@@ -38,7 +39,12 @@ public class InfinispanConfig {
     }
 
     @Bean
-    public Cache<Integer, AlertStateMachine> alertStateMachineCache(SpringEmbeddedCacheManager cacheManager) {
+    public Cache<Integer, StateMachine<State, Trigger>> alertStateMachineCache(SpringEmbeddedCacheManager cacheManager) {
         return cacheManager.getNativeCacheManager().getCache("alert-state-machine-cache");
+    }
+
+    @Bean
+    public Cache<String, StateMachine<State, Trigger>> incomingAlertStateMachineCache(SpringEmbeddedCacheManager cacheManager) {
+        return cacheManager.getNativeCacheManager().getCache("incoming-alert-state-machine-cache");
     }
 }

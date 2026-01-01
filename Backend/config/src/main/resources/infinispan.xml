@@ -38,6 +38,7 @@
             </indexing>
         </replicated-cache>
 
+        <distributed-cache name="incoming-alert-state-machine-cache"/>
         <distributed-cache name="alert-state-machine-cache"/>
 
     </cache-container>

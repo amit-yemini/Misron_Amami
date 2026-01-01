@@ -1,5 +1,6 @@
-package msa;
+package msa.CacheServices;
 
+import msa.*;
 import org.infinispan.Cache;
 import org.infinispan.commons.api.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;

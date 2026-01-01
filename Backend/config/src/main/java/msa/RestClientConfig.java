@@ -14,7 +14,7 @@ public class RestClientConfig {
     private int timeout;
 
     @Bean
-    public RestClient restClient(RestClient.Builder builder) {
+    public RestClient zofarim(RestClient.Builder builder) {
         SimpleClientHttpRequestFactory factory =
                 new SimpleClientHttpRequestFactory();
         factory.setReadTimeout(this.timeout);
