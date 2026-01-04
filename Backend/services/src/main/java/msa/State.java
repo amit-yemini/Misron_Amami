@@ -1,4 +1,4 @@
-package msa.AlertStateMachine;
+package msa;
 
 public enum State {
     INITIAL,
