@@ -1,4 +1,4 @@
-package msa;
+package msa.AlertStateMachine;
 
 public enum Trigger {
     START_AUTO,
