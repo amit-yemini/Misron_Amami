@@ -26,19 +26,16 @@ public class AlertStateMachineConfig {
             StateConfiguration<State, Trigger> stateConfiguration =
                     config.configure(stateDefinition.getState());
 
-            // config on entry action
-            if (stateDefinition.getEntryTrigger() != null && stateDefinition.getAction() != null) {
+            if (stateDefinition.getEntryTrigger() != null) {
                 stateConfiguration.onEntryFrom(stateDefinition.getEntryTrigger(), (alert, fromState) ->
                         stateDefinition.getAction().doIt(alert, fromState));
             }
 
-            // config permits
-            if (stateDefinition.getPermissions() != null && !stateDefinition.getPermissions().isEmpty()) {
-                stateDefinition.getPermissions().forEach(permission ->
+            if (stateDefinition.getTransitions() != null && !stateDefinition.getTransitions().isEmpty()) {
+                stateDefinition.getTransitions().forEach(permission ->
                         stateConfiguration.permitDynamic(permission.trigger, permission.destinationStateSelector));
             }
 
-            // config ignores
             if (stateDefinition.ignoreTriggers() != null && !stateDefinition.ignoreTriggers().isEmpty()) {
                 stateDefinition.ignoreTriggers().forEach(stateConfiguration::ignore);
             }

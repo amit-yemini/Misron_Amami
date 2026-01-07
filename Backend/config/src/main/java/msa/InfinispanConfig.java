@@ -39,8 +39,8 @@ public class InfinispanConfig {
     }
 
     @Bean
-    public Cache<Integer, StateMachine<State, Trigger>> alertStateMachineCache(SpringEmbeddedCacheManager cacheManager) {
-        return cacheManager.getNativeCacheManager().getCache("alert-state-machine-cache");
+    public Cache<Integer, AlertContext> alertContextCache(SpringEmbeddedCacheManager cacheManager) {
+        return cacheManager.getNativeCacheManager().getCache("alert-context-cache");
     }
 
     @Bean

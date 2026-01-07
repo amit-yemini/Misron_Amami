@@ -3,10 +3,7 @@ package msa.CacheServices;
 import com.github.oxo42.stateless4j.StateMachine;
 import com.github.oxo42.stateless4j.triggers.TriggerWithParameters2;
 import lombok.extern.slf4j.Slf4j;
-import msa.Alert;
-import msa.AlertDiscreditedException;
-import msa.State;
-import msa.Trigger;
+import msa.*;
 import org.infinispan.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,33 +12,36 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class AlertStateCacheService{
     @Autowired
-    private Cache<Integer, StateMachine<State, Trigger>> alertStateMachineCache;
+    private Cache<Integer, AlertContext> alertContextCache;
+    @Autowired
+    private IncomingAlertStateMachineCacheService incomingAlertStateMachineCacheService;
+    @Autowired
+    private AlertTriggers alertTriggers;
 
     public int getKey(Alert alert) {
         return alert.getIncidentId();
     }
 
-    public void addAlertStateMachine(int key, StateMachine<State, Trigger> alertStateMachine) {
-        if (alertStateMachineCache.containsKey(key)) {
-            alertStateMachineCache.get(key).fire(Trigger.INVALID);
+    public void addAlertContext(Alert alert, State state) {
+        if (alertContextCache.containsKey(getKey(alert))) {
+            incomingAlertStateMachineCacheService
+                    .fire(alertTriggers.getInvalidateTrigger(),
+                            alertContextCache.get(getKey(alert)).getAlert(), state);
         }
-        alertStateMachineCache.put(key, alertStateMachine);
+        alertContextCache.put(getKey(alert), new AlertContext(alert, state));
     }
 
     public void checkAlertRelevance(int incidentId) {
-        if (alertStateMachineCache.containsKey(incidentId)) {
-            if (alertStateMachineCache.get(incidentId).getState() == State.INVALIDATED) {
+        if (alertContextCache.containsKey(incidentId)) {
+            if (alertContextCache.get(incidentId).getState() == State.INVALIDATED) {
                 throw new AlertDiscreditedException(incidentId);
             }
         }
     }
 
-    public StateMachine<State, Trigger> getAlertStateMachine(int incidentId) {
-        return alertStateMachineCache.get(incidentId);
-    }
-
-    public void fire(TriggerWithParameters2<Alert, State, Trigger> trigger, Alert alert, State state) {
-        log.info("firing trigger {} for alert {}", trigger.getTrigger(), getKey(alert));
-        alertStateMachineCache.get(this.getKey(alert)).fire(trigger, alert, state);
+    public void updateState(Alert alert, State state) {
+        if (alertContextCache.containsKey(getKey(alert))) {
+        alertContextCache.get(getKey(alert)).setState(state);
+        }
     }
 }

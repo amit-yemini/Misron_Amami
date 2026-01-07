@@ -8,7 +8,7 @@ import java.util.List;
 public interface StateDefinition<S, T, Arg> {
     S getState();
     Action2<Arg, S> getAction();
-    List<Transition<S, T, Arg>> getPermissions();
+    List<Transition<S, T, Arg>> getTransitions();
     TriggerWithParameters2<Arg, S, T> getEntryTrigger();
     List<T> ignoreTriggers();
 }

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class InvalidatedState implements StateDefinition<State, Trigger, Alert> {
+public class InvalidatedState extends BaseAlertState {
     @Autowired
     private AlertTriggers alertTriggers;
 
@@ -19,12 +19,12 @@ public class InvalidatedState implements StateDefinition<State, Trigger, Alert> 
     }
 
     @Override
-    public Action2<Alert, State> getAction() {
-        return null;
+    public void execute(Alert alert, State state) {
+
     }
 
     @Override
-    public List<Transition<State, Trigger, Alert>> getPermissions() {
+    public List<Transition<State, Trigger, Alert>> getTransitions() {
         return List.of();
     }
 
@@ -35,7 +35,6 @@ public class InvalidatedState implements StateDefinition<State, Trigger, Alert> 
 
     @Override
     public List<Trigger> ignoreTriggers() {
-        // TODO: change triggers to trigger with parameters from alertTriggers
         return List.of(Trigger.NEXT,
                 Trigger.INVALID,
                 Trigger.START_AUTO,

@@ -1,10 +1,10 @@
 package msa.AlertStates;
 
-import com.github.oxo42.stateless4j.delegates.Action2;
 import com.github.oxo42.stateless4j.triggers.TriggerWithParameters2;
 import lombok.extern.slf4j.Slf4j;
 import msa.*;
-import msa.CacheServices.AlertStateCacheService;
+import msa.CacheServices.IncomingAlertStateMachineCacheService;
+import msa.mappers.AlertMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,35 +12,35 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class DistributionState implements StateDefinition<State, Trigger, Alert>{
+public class DistributionState extends BaseAlertState{
     @Autowired
     private ZofarimService zofarimService;
     @Autowired
     private SocketIOSender socketIOSender;
     @Autowired
-    private AlertStateCacheService alertStateCacheService;
+    private IncomingAlertStateMachineCacheService incomingAlertStateMachineCacheService;
     @Autowired
     private AlertTriggers alertTriggers;
+    @Autowired
+    private AlertMapper alertMapper;
 
-            @Override
-            public State getState() {
+    @Override
+    public State getState() {
                 return State.DISTRIBUTION;
             }
 
-            @Override
-            public Action2<Alert, State> getAction() {
-                return (alert, state) -> {
-                    if (state == State.WAITING) {
-                        sendCancellationToClients(alert.getIncidentId());
-                    }
+    @Override
+    public void execute(Alert alert, State state) {
+        if (state == State.WAITING) {
+            sendCancellationToClients(alert.getIncidentId());
+        }
 
-                    distribute(new AlertDistribution(alert));
-                    alertStateCacheService.fire(alertTriggers.getInvalidateTrigger(), alert, state);
-                };
-            }
+        distribute(alertMapper.toDistribution(alert));
+        incomingAlertStateMachineCacheService.fire(alertTriggers.getInvalidateTrigger(), alert, getState());
+    }
 
-            @Override
-            public List<Transition<State, Trigger, Alert>> getPermissions() {
+    @Override
+            public List<Transition<State, Trigger, Alert>> getTransitions() {
                 return List.of(new Transition<>(
                         alertTriggers.getInvalidateTrigger(),
                         (alert, state) -> State.INVALIDATED

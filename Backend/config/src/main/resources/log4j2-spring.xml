@@ -37,6 +37,7 @@
         <!-- Your app -->
         <Logger name="msa" level="info" additivity="false">
             <AppenderRef ref="FileAppender"/>
+            <AppenderRef ref="Console"/>
         </Logger>
 
         <!-- Hibernate noise control -->

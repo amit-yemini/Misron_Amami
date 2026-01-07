@@ -48,6 +48,4 @@ public class Alert {
     private Impact impact;
 
     private int alertTypeId;
-    private boolean isManual = false;
-    private boolean isCancelled = false;
 }

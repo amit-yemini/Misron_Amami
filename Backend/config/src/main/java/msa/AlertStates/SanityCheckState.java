@@ -15,7 +15,7 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class SanityCheckState implements StateDefinition<State, Trigger, Alert> {
+public class SanityCheckState extends BaseAlertState {
     @Autowired
     private LaunchCountryCacheService launchCountryCacheService;
     @Autowired
@@ -33,15 +33,18 @@ public class SanityCheckState implements StateDefinition<State, Trigger, Alert> 
     }
 
     @Override
-    public Action2<Alert, State> getAction() {
-        return (alert, state) -> {
-            sanityCheck(alert);
-            incomingAlertStateMachineCacheService.fire(alertTriggers.getNextTrigger(), alert, state);
-        };
+    public void execute(Alert alert, State state) {
+        log.info("starting sanity check for alert: incident: {}, identifier: {}",
+                alert.getIncidentId(), alert.getIdentifier());
+        launchCountryCheck(alert.getSourceId());
+        alert.setAlertTypeId(getAlertType(alert.getCategory(), alert.getEvent()));
+        checkAlertToMissileMatch(alert.getAlertTypeId(), alert.getMissileType());
+        checkSender(alert.getSender());
+        incomingAlertStateMachineCacheService.fire(alertTriggers.getNextTrigger(), alert, getState());
     }
 
     @Override
-    public List<Transition<State, Trigger, Alert>> getPermissions() {
+    public List<Transition<State, Trigger, Alert>> getTransitions() {
         return List.of(
                 new Transition<>(
                         alertTriggers.getNextTrigger(),
@@ -58,15 +61,6 @@ public class SanityCheckState implements StateDefinition<State, Trigger, Alert> 
     @Override
     public List<Trigger> ignoreTriggers() {
         return List.of();
-    }
-
-    public void sanityCheck(Alert alert) throws NotFoundException, InvalidSenderException {
-        log.info("starting sanity check for alert: incident: {}, identifier: {}",
-                alert.getIncidentId(), alert.getIdentifier());
-        launchCountryCheck(alert.getSourceId());
-        alert.setAlertTypeId(getAlertType(alert.getCategory(), alert.getEvent()));
-        checkAlertToMissileMatch(alert.getAlertTypeId(), alert.getMissileType());
-        checkSender(alert.getSender());
     }
 
     private void launchCountryCheck(int externalId) throws NotFoundException {

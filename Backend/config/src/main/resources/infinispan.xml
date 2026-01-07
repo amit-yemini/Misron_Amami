@@ -38,8 +38,8 @@
             </indexing>
         </replicated-cache>
 
-        <distributed-cache name="incoming-alert-state-machine-cache"/>
-        <distributed-cache name="alert-state-machine-cache"/>
+        <distributed-cache name="incoming-alert-state-machine-cache" key-partitioner="msa.CustomKeyPartitioner"/>
+        <distributed-cache name="alert-context-cache" key-partitioner="msa.CustomKeyPartitioner"/>
 
     </cache-container>
 </infinispan>

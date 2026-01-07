@@ -1,11 +1,11 @@
 package msa.AlertStates;
 
-import com.github.oxo42.stateless4j.delegates.Action2;
 import com.github.oxo42.stateless4j.triggers.TriggerWithParameters2;
 import lombok.extern.slf4j.Slf4j;
 import msa.*;
-import msa.CacheServices.AlertStateCacheService;
 import msa.CacheServices.AlertTypeCacheService;
+import msa.CacheServices.IncomingAlertStateMachineCacheService;
+import msa.mappers.AlertMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,15 +17,17 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
-public class WaitingState implements StateDefinition<State, Trigger, Alert> {
+public class WaitingState extends BaseAlertState {
     @Autowired
     private AlertTypeCacheService alertTypeCacheService;
     @Autowired
     private SocketIOSender socketIOSender;
     @Autowired
-    private AlertStateCacheService alertStateCacheService;
+    private IncomingAlertStateMachineCacheService incomingAlertStateMachineCacheService;
     @Autowired
     private AlertTriggers alertTriggers;
+    @Autowired
+    private AlertMapper alertMapper;
 
     @Override
     public State getState() {
@@ -33,20 +35,18 @@ public class WaitingState implements StateDefinition<State, Trigger, Alert> {
     }
 
     @Override
-    public Action2<Alert, State> getAction() {
-        return (alert, state) -> {
-            sendAlertToClients(new AlertDistribution(alert));
-            int delaySeconds = calculateInterventionTime(
-                    alert.getImpact().getTime(),
-                    alert.getAlertTypeId()
-            );
+    public void execute(Alert alert, State state) {
+        sendAlertToClients(alertMapper.toDistribution(alert));
+        int delaySeconds = calculateInterventionTime(
+                alert.getImpact().getTime(),
+                alert.getAlertTypeId()
+        );
 
-            scheduleWaitExpired(alert, delaySeconds);
-        };
+        scheduleWaitExpired(alert, delaySeconds);
     }
 
     @Override
-    public List<Transition<State, Trigger, Alert>> getPermissions() {
+    public List<Transition<State, Trigger, Alert>> getTransitions() {
         return List.of(
                 new Transition<>(
                         alertTriggers.getNextTrigger(),
@@ -92,6 +92,6 @@ public class WaitingState implements StateDefinition<State, Trigger, Alert> {
     }
 
     private void onWaitExpired(Alert alert) {
-        alertStateCacheService.fire(alertTriggers.getNextTrigger(), alert, State.WAITING);
+        incomingAlertStateMachineCacheService.fire(alertTriggers.getNextTrigger(), alert, getState());
     }
 }

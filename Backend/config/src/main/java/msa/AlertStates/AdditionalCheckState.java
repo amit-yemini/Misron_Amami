@@ -16,13 +16,13 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class AdditionalCheckState implements StateDefinition<State, Trigger, Alert> {
-    @Autowired
-    private AlertStateCacheService alertStateCacheService;
+public class AdditionalCheckState extends BaseAlertState {
     @Autowired
     private AlertTypeCacheService alertTypeCacheService;
     @Autowired
     private IncomingAlertStateMachineCacheService incomingAlertStateMachineCacheService;
+    @Autowired
+    private AlertStateCacheService alertStateCacheService;
     @Autowired
     private AlertTriggers alertTriggers;
 
@@ -32,15 +32,18 @@ public class AdditionalCheckState implements StateDefinition<State, Trigger, Ale
     }
 
     @Override
-    public Action2<Alert, State> getAction() {
-        return (alert, state) -> {
-            additionalCheck(alert);
-            alertStateCacheService.fire(alertTriggers.getNextTrigger(), alert, state);
-        };
+    public void execute(Alert alert, State state) {
+        log.info("starting additional check for alert: incident: {}, identifier: {}",
+                alert.getIncidentId(), alert.getIdentifier());
+        checkSendTime(alert.getTimeSent());
+        checkImpactTime(alert.getImpact().getTime());
+        checkAlertRelevance(alert.getIncidentId());
+        addAlertStateMachineFromIncomingCache(alert);
+        incomingAlertStateMachineCacheService.fire(alertTriggers.getNextTrigger(), alert, getState());
     }
 
     @Override
-    public List<Transition<State, Trigger, Alert>> getPermissions() {
+    public List<Transition<State, Trigger, Alert>> getTransitions() {
         return List.of(new Transition<>(
                 alertTriggers.getNextTrigger(),
                 (alert, state) -> {
@@ -58,15 +61,6 @@ public class AdditionalCheckState implements StateDefinition<State, Trigger, Ale
     @Override
     public List<Trigger> ignoreTriggers() {
         return List.of();
-    }
-
-    public void additionalCheck(Alert alert) throws AlertDiscreditedException {
-        log.info("starting additional check for alert: incident: {}, identifier: {}",
-                alert.getIncidentId(), alert.getIdentifier());
-        checkSendTime(alert.getTimeSent());
-        checkImpactTime(alert.getImpact().getTime());
-        checkAlertRelevance(alert.getIncidentId());
-        addAlertStateMachineFromIncomingCache(alert);
     }
 
     private void checkSendTime(long sendTime) {
@@ -92,8 +86,6 @@ public class AdditionalCheckState implements StateDefinition<State, Trigger, Ale
     }
 
     private void addAlertStateMachineFromIncomingCache(Alert alert) {
-        alertStateCacheService
-                .addAlertStateMachine(alertStateCacheService.getKey(alert),
-                        incomingAlertStateMachineCacheService.getIncomingAlertStateMachine(alert));
+        alertStateCacheService.addAlertContext(alert, getState());
     }
 }
