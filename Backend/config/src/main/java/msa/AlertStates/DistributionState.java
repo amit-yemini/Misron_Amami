@@ -1,6 +1,6 @@
 package msa.AlertStates;
 
-import com.github.oxo42.stateless4j.triggers.TriggerWithParameters2;
+import com.github.oxo42.stateless4j.triggers.TriggerWithParameters1;
 import lombok.extern.slf4j.Slf4j;
 import msa.*;
 import msa.CacheServices.IncomingAlertStateMachineCacheService;
@@ -30,26 +30,22 @@ public class DistributionState extends BaseAlertState{
             }
 
     @Override
-    public void execute(Alert alert, State state) {
-        if (state == State.WAITING) {
-            sendCancellationToClients(alert.getIncidentId());
-        }
-
+    public void execute(Alert alert) {
         distribute(alertMapper.toDistribution(alert));
-        incomingAlertStateMachineCacheService.fire(alertTriggers.getInvalidateTrigger(), alert, getState());
+        incomingAlertStateMachineCacheService.fire(alertTriggers.get(Trigger.INVALID), alert, getState());
     }
 
     @Override
             public List<Transition<State, Trigger, Alert>> getTransitions() {
                 return List.of(new Transition<>(
-                        alertTriggers.getInvalidateTrigger(),
-                        (alert, state) -> State.INVALIDATED
+                        alertTriggers.get(Trigger.INVALID),
+                        State.INVALIDATED
                 ));
             }
 
             @Override
-            public TriggerWithParameters2<Alert, State, Trigger> getEntryTrigger() {
-                return alertTriggers.getNextTrigger();
+            public TriggerWithParameters1<Alert, Trigger> getEntryTrigger() {
+                return alertTriggers.get(Trigger.NEXT);
             }
 
             @Override

@@ -35,14 +35,4 @@ public class AlertDistribution {
     @NotNull
     @Valid
     private Impact impact;
-
-    public AlertDistribution(Alert alert) {
-        this.incidentId = alert.getIncidentId();
-        this.identifier = alert.getIdentifier();
-        this.timeSent = alert.getTimeSent();
-        this.sourceId = alert.getSourceId();
-        this.alertTypeId = alert.getAlertTypeId();
-        this.missileType = alert.getMissileType();
-        this.impact = alert.getImpact();
-    }
 }

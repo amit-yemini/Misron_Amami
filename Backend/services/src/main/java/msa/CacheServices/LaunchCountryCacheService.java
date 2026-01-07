@@ -1,6 +1,6 @@
 package msa.CacheServices;
 
-import msa.LaunchCountry;
+import msa.DBEntities.LaunchCountry;
 import msa.NotFoundException;
 import org.infinispan.Cache;
 import org.infinispan.commons.api.query.Query;
@@ -16,7 +16,7 @@ public class LaunchCountryCacheService {
 
     public LaunchCountry getLaunchCountryByExternalId(int externalId) {
         Query<LaunchCountry> query = launchCountryCache.query(
-                "FROM msa.LaunchCountry " +
+                "FROM msa.DBEntities.LaunchCountry " +
                         "WHERE externalId = :externalId");
 
         query.setParameter("externalId", externalId);

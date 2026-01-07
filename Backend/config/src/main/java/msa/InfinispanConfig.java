@@ -1,6 +1,10 @@
 package msa;
 
 import com.github.oxo42.stateless4j.StateMachine;
+import msa.DBEntities.AlertType;
+import msa.DBEntities.LaunchCountry;
+import msa.DBEntities.MissileType;
+import msa.DBEntities.MsaSchemaImpl;
 import org.infinispan.Cache;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.protostream.SerializationContextInitializer;

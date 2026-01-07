@@ -23,7 +23,6 @@
         <lombok.version>1.18.42</lombok.version>
     </properties>
     <modules>
-        <module>entities</module>
         <module>repositories</module>
         <module>models</module>
         <module>services</module>
@@ -92,6 +91,11 @@
                                 <groupId>org.infinispan.protostream</groupId>
                                 <artifactId>protostream-processor</artifactId>
                                 <version>${protostream.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.mapstruct</groupId>
+                                <artifactId>mapstruct-processor</artifactId>
+                                <version>1.6.3</version>
                             </path>
                         </annotationProcessorPaths>
                     </configuration>

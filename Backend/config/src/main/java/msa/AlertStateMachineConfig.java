@@ -2,6 +2,8 @@ package msa;
 
 import com.github.oxo42.stateless4j.StateConfiguration;
 import com.github.oxo42.stateless4j.StateMachineConfig;
+import msa.AlertStates.ActionlessBaseAlertState;
+import msa.AlertStates.BaseAlertState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,9 +28,9 @@ public class AlertStateMachineConfig {
             StateConfiguration<State, Trigger> stateConfiguration =
                     config.configure(stateDefinition.getState());
 
-            if (stateDefinition.getEntryTrigger() != null) {
-                stateConfiguration.onEntryFrom(stateDefinition.getEntryTrigger(), (alert, fromState) ->
-                        stateDefinition.getAction().doIt(alert, fromState));
+            if (!(stateDefinition instanceof ActionlessBaseAlertState)) {
+                stateConfiguration.onEntryFrom(stateDefinition.getEntryTrigger(), (alert) ->
+                        stateDefinition.getAction().doIt(alert));
             }
 
             if (stateDefinition.getTransitions() != null && !stateDefinition.getTransitions().isEmpty()) {

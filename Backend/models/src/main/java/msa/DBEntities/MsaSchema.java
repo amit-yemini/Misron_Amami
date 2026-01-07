@@ -1,4 +1,4 @@
-package msa;
+package msa.DBEntities;
 
 import org.infinispan.protostream.GeneratedSchema;
 import org.infinispan.protostream.annotations.ProtoSchema;

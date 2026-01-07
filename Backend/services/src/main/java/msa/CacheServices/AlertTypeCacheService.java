@@ -1,6 +1,10 @@
 package msa.CacheServices;
 
 import msa.*;
+import msa.DBEntities.AlertCategory;
+import msa.DBEntities.AlertEvent;
+import msa.DBEntities.AlertType;
+import msa.DBEntities.MissileType;
 import org.infinispan.Cache;
 import org.infinispan.commons.api.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +20,7 @@ public class AlertTypeCacheService {
     public AlertType getAlertTypeByCategoryAndEvent(AlertCategory category, AlertEvent event) {
         List<AlertType> found;
         Query<AlertType> query = alertTypeCache.query(
-                "FROM msa.AlertType " +
+                "FROM msa.DBEntities.AlertType " +
                         "WHERE category = :category AND event = :event");
 
         query.setParameter("category", category);
@@ -41,7 +45,7 @@ public class AlertTypeCacheService {
     }
 
     public int getDistributionTime(int alertTypeId) {
-        Query<AlertType> query = alertTypeCache.query("FROM msa.AlertType WHERE id = :id");
+        Query<AlertType> query = alertTypeCache.query("FROM msa.DBEntities.AlertType WHERE id = :id");
         query.setParameter("id", alertTypeId);
         AlertType alertType = query.execute().list().getFirst();
         return alertType.getDistributionTime();

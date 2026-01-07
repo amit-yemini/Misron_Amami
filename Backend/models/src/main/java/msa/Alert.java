@@ -5,6 +5,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
+import msa.DBEntities.AlertCategory;
+import msa.DBEntities.AlertEvent;
 
 @Data
 public class Alert {

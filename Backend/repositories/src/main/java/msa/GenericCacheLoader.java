@@ -1,5 +1,6 @@
 package msa;
 
+import msa.DBEntities.BaseEntity;
 import org.infinispan.Cache;
 import org.springframework.data.jpa.repository.JpaRepository;
 

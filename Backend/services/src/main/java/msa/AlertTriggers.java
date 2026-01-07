@@ -1,23 +1,26 @@
 package msa;
 
 import com.github.oxo42.stateless4j.StateMachineConfig;
-import com.github.oxo42.stateless4j.triggers.TriggerWithParameters2;
+import com.github.oxo42.stateless4j.triggers.TriggerWithParameters1;
 import lombok.Data;
 import org.springframework.stereotype.Component;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 @Component
 @Data
 public class AlertTriggers {
-    private TriggerWithParameters2<Alert, State, Trigger> nextTrigger;
-    private TriggerWithParameters2<Alert, State, Trigger> startAutoTrigger;
-    private TriggerWithParameters2<Alert, State, Trigger> startManualTrigger;
-    private TriggerWithParameters2<Alert, State, Trigger> invalidateTrigger;
+    private final Map<Trigger, TriggerWithParameters1<Alert, Trigger>> triggers =
+            new EnumMap<>(Trigger.class);
 
     public void initialize(StateMachineConfig<State, Trigger> config) {
-        this.nextTrigger = config.setTriggerParameters(Trigger.NEXT, Alert.class, State.class);
-        this.startAutoTrigger = config.setTriggerParameters(Trigger.START_AUTO, Alert.class, State.class);
-        this.startManualTrigger = config.setTriggerParameters(Trigger.START_MANUAL, Alert.class, State.class);
-        this.invalidateTrigger = config.setTriggerParameters(Trigger.INVALID, Alert.class, State.class);
+        for (Trigger trigger : Trigger.values()) {
+            triggers.put(trigger, config.setTriggerParameters(trigger, Alert.class));
+        }
     }
 
+    public TriggerWithParameters1<Alert, Trigger> get(Trigger trigger) {
+        return triggers.get(trigger);
+    }
 }

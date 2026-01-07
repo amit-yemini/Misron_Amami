@@ -14,7 +14,7 @@
             <indexing enabled="true" storage="local-heap">
                 <indexed-entities>
                     <indexed-entity>
-                        msa.LaunchCountry
+                        msa.DBEntities.LaunchCountry
                     </indexed-entity>
                 </indexed-entities>
             </indexing>
@@ -23,7 +23,7 @@
             <indexing enabled="true" storage="local-heap">
                 <indexed-entities>
                     <indexed-entity>
-                        msa.AlertType
+                        msa.DBEntities.AlertType
                     </indexed-entity>
                 </indexed-entities>
             </indexing>
@@ -32,7 +32,7 @@
             <indexing enabled="true" storage="local-heap">
                 <indexed-entities>
                     <indexed-entity>
-                        msa.MissileType
+                        msa.DBEntities.MissileType
                     </indexed-entity>
                 </indexed-entities>
             </indexing>

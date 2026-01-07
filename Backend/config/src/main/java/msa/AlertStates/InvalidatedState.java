@@ -1,8 +1,8 @@
 package msa.AlertStates;
 
-import com.github.oxo42.stateless4j.delegates.Action2;
-import com.github.oxo42.stateless4j.triggers.TriggerWithParameters2;
+import com.github.oxo42.stateless4j.triggers.TriggerWithParameters1;
 import msa.*;
+import msa.CacheServices.IncomingAlertStateMachineCacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +12,8 @@ import java.util.List;
 public class InvalidatedState extends BaseAlertState {
     @Autowired
     private AlertTriggers alertTriggers;
+    @Autowired
+    private IncomingAlertStateMachineCacheService incomingAlertStateMachineCacheService;
 
     @Override
     public State getState() {
@@ -19,8 +21,8 @@ public class InvalidatedState extends BaseAlertState {
     }
 
     @Override
-    public void execute(Alert alert, State state) {
-
+    public void execute(Alert alert) {
+        incomingAlertStateMachineCacheService.removeStateMachine(alert);
     }
 
     @Override
@@ -29,8 +31,8 @@ public class InvalidatedState extends BaseAlertState {
     }
 
     @Override
-    public TriggerWithParameters2<Alert, State, Trigger> getEntryTrigger() {
-        return alertTriggers.getInvalidateTrigger();
+    public TriggerWithParameters1<Alert, Trigger> getEntryTrigger() {
+        return alertTriggers.get(Trigger.INVALID);
     }
 
     @Override

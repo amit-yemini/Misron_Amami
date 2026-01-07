@@ -1,7 +1,5 @@
 package msa.CacheServices;
 
-import com.github.oxo42.stateless4j.StateMachine;
-import com.github.oxo42.stateless4j.triggers.TriggerWithParameters2;
 import lombok.extern.slf4j.Slf4j;
 import msa.*;
 import org.infinispan.Cache;
@@ -25,7 +23,7 @@ public class AlertStateCacheService{
     public void addAlertContext(Alert alert, State state) {
         if (alertContextCache.containsKey(getKey(alert))) {
             incomingAlertStateMachineCacheService
-                    .fire(alertTriggers.getInvalidateTrigger(),
+                    .fire(alertTriggers.get(Trigger.INVALID),
                             alertContextCache.get(getKey(alert)).getAlert(), state);
         }
         alertContextCache.put(getKey(alert), new AlertContext(alert, state));
@@ -41,7 +39,7 @@ public class AlertStateCacheService{
 
     public void updateState(Alert alert, State state) {
         if (alertContextCache.containsKey(getKey(alert))) {
-        alertContextCache.get(getKey(alert)).setState(state);
+            alertContextCache.get(getKey(alert)).setState(state);
         }
     }
 }

@@ -21,6 +21,6 @@ public class AlertService {
         StateMachine<State, Trigger> stateMachine =
                 new StateMachine<>(State.INITIAL, stateMachineConfig);
         incomingAlertStateMachineCacheService.addIncomingAlert(alert, stateMachine);
-        stateMachine.fire(alertTriggers.getStartAutoTrigger(), alert, State.INITIAL);
+        stateMachine.fire(alertTriggers.get(Trigger.START_AUTO), alert);
     }
 }

@@ -1,6 +1,6 @@
 package msa.CacheServices;
 
-import msa.MissileType;
+import msa.DBEntities.MissileType;
 import msa.NotFoundException;
 import org.infinispan.Cache;
 import org.infinispan.commons.api.query.Query;
@@ -16,7 +16,7 @@ public class MissileTypeCacheService {
 
     public MissileType getMissileTypeByExternalId(int externalMissileId) {
         Query<MissileType> query = missileTypeCache.query(
-                "FROM msa.MissileType " +
+                "FROM msa.DBEntities.MissileType " +
                         "WHERE externalId = :externalId");
 
         query.setParameter("externalId", externalMissileId);

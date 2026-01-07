@@ -1,4 +1,4 @@
-package msa;
+package msa.DBEntities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

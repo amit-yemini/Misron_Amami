@@ -1,7 +1,5 @@
 package msa.AlertStates;
 
-import com.github.oxo42.stateless4j.delegates.Action2;
-import com.github.oxo42.stateless4j.triggers.TriggerWithParameters2;
 import msa.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -9,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class InitialState extends BaseAlertState {
+public class InitialState extends ActionlessBaseAlertState {
     @Autowired
     private AlertTriggers alertTriggers;
 
@@ -19,27 +17,17 @@ public class InitialState extends BaseAlertState {
     }
 
     @Override
-    public void execute(Alert alert, State state) {
-
-    }
-
-    @Override
     public List<Transition<State, Trigger, Alert>> getTransitions() {
         return List.of(
                 new Transition<>(
-                        alertTriggers.getStartAutoTrigger(),
-                        (alert, state) -> State.SANITY_CHECK
+                        alertTriggers.get(Trigger.START_AUTO),
+                        State.SANITY_CHECK
                 ),
                 new Transition<>(
-                        alertTriggers.getStartManualTrigger(),
-                        (alert, state) -> State.DISTRIBUTION
+                        alertTriggers.get(Trigger.START_MANUAL),
+                        State.DISTRIBUTION
                 )
         );
-    }
-
-    @Override
-    public TriggerWithParameters2<Alert, State, Trigger> getEntryTrigger() {
-        return null;
     }
 
     @Override

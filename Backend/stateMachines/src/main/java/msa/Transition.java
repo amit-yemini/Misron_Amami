@@ -1,14 +1,14 @@
 package msa;
 
-import com.github.oxo42.stateless4j.delegates.Func3;
-import com.github.oxo42.stateless4j.triggers.TriggerWithParameters2;
+import com.github.oxo42.stateless4j.delegates.Func2;
+import com.github.oxo42.stateless4j.triggers.TriggerWithParameters1;
 
 public class Transition<S, T, Arg> {
-    public TriggerWithParameters2<Arg, S, T> trigger;
-    public Func3<Arg,S, S> destinationStateSelector;
+    public TriggerWithParameters1<Arg, T> trigger;
+    public Func2<Arg, S> destinationStateSelector;
 
-    public Transition(TriggerWithParameters2<Arg, S, T> trigger, Func3<Arg,S, S> destinationStateSelector) {
+    public Transition(TriggerWithParameters1<Arg, T> trigger, S state) {
         this.trigger = trigger;
-        this.destinationStateSelector = destinationStateSelector;
+        this.destinationStateSelector = (arg) -> state;
     }
 }

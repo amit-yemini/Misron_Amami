@@ -1,13 +1,16 @@
 package msa.AlertStates;
 
-import com.github.oxo42.stateless4j.delegates.Action2;
-import com.github.oxo42.stateless4j.triggers.TriggerWithParameters2;
+import com.github.oxo42.stateless4j.triggers.TriggerWithParameters1;
 import lombok.extern.slf4j.Slf4j;
 import msa.*;
 import msa.CacheServices.AlertTypeCacheService;
 import msa.CacheServices.IncomingAlertStateMachineCacheService;
 import msa.CacheServices.LaunchCountryCacheService;
 import msa.CacheServices.MissileTypeCacheService;
+import msa.DBEntities.AlertCategory;
+import msa.DBEntities.AlertEvent;
+import msa.DBEntities.AlertType;
+import msa.DBEntities.LaunchCountry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,29 +36,29 @@ public class SanityCheckState extends BaseAlertState {
     }
 
     @Override
-    public void execute(Alert alert, State state) {
+    public void execute(Alert alert) {
         log.info("starting sanity check for alert: incident: {}, identifier: {}",
                 alert.getIncidentId(), alert.getIdentifier());
         launchCountryCheck(alert.getSourceId());
         alert.setAlertTypeId(getAlertType(alert.getCategory(), alert.getEvent()));
         checkAlertToMissileMatch(alert.getAlertTypeId(), alert.getMissileType());
         checkSender(alert.getSender());
-        incomingAlertStateMachineCacheService.fire(alertTriggers.getNextTrigger(), alert, getState());
+        incomingAlertStateMachineCacheService.fire(alertTriggers.get(Trigger.NEXT), alert, getState());
     }
 
     @Override
     public List<Transition<State, Trigger, Alert>> getTransitions() {
         return List.of(
                 new Transition<>(
-                        alertTriggers.getNextTrigger(),
-                        (alert, state) -> State.ADDITIONAL_CHECK
+                        alertTriggers.get(Trigger.NEXT),
+                        State.ADDITIONAL_CHECK
                 )
         );
     }
 
     @Override
-    public TriggerWithParameters2<Alert, State, Trigger> getEntryTrigger() {
-        return alertTriggers.getStartAutoTrigger();
+    public TriggerWithParameters1<Alert, Trigger> getEntryTrigger() {
+        return alertTriggers.get(Trigger.START_AUTO);
     }
 
     @Override

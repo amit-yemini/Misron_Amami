@@ -1,4 +1,4 @@
-package msa;
+package msa.DBEntities;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

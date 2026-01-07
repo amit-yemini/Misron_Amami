@@ -1,6 +1,7 @@
 package msa.CacheServices;
 
 import com.github.oxo42.stateless4j.StateMachine;
+import com.github.oxo42.stateless4j.triggers.TriggerWithParameters1;
 import com.github.oxo42.stateless4j.triggers.TriggerWithParameters2;
 import lombok.extern.slf4j.Slf4j;
 import msa.Alert;
@@ -24,12 +25,16 @@ public class IncomingAlertStateMachineCacheService {
         incomingAlertStateMachineCache.put(this.getKey(alert), stateMachine);
     }
 
-    public void fire(TriggerWithParameters2<Alert, State, Trigger> trigger, Alert alert, State state) {
+    public void fire(TriggerWithParameters1<Alert, Trigger> trigger, Alert alert, State state) {
         log.info("firing trigger {} for alert {}", trigger.getTrigger(), getKey(alert));
-        incomingAlertStateMachineCache.get(this.getKey(alert)).fire(trigger, alert, state);
+        incomingAlertStateMachineCache.get(this.getKey(alert)).fire(trigger, alert);
     }
 
     public StateMachine<State, Trigger> getIncomingAlertStateMachine(Alert alert) {
         return incomingAlertStateMachineCache.get(this.getKey(alert));
+    }
+
+    public void removeStateMachine(Alert alert) {
+        incomingAlertStateMachineCache.remove(this.getKey(alert));
     }
 }
