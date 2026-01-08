@@ -8,5 +8,4 @@ import lombok.Data;
 public class AlertContext {
     private Alert alert;
     private State state;
-
 }

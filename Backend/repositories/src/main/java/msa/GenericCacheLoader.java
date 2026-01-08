@@ -1,14 +1,15 @@
 package msa;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import msa.DBEntities.BaseEntity;
 import org.infinispan.Cache;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public class GenericCacheLoader<K, V extends BaseEntity<K>> implements CacheLoader{
-    private final JpaRepository<V, K> repository;
-    private final Cache<K, V> cache;
+public class GenericCacheLoader<V extends BaseEntity> implements CacheLoader{
+    private final JpaRepository<V, Integer> repository;
+    private final Cache<Integer, V> cache;
 
-    public GenericCacheLoader(JpaRepository<V, K> repository, Cache<K, V> cache) {
+    public GenericCacheLoader(JpaRepository<V, Integer> repository, Cache<Integer, V> cache) {
         this.repository = repository;
         this.cache = cache;
     }

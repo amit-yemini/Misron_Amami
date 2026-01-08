@@ -12,7 +12,7 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class DistributionState extends BaseAlertState{
+public class DistributionState extends BaseAlertState {
     @Autowired
     private ZofarimService zofarimService;
     @Autowired
@@ -26,40 +26,32 @@ public class DistributionState extends BaseAlertState{
 
     @Override
     public State getState() {
-                return State.DISTRIBUTION;
-            }
+        return State.DISTRIBUTION;
+    }
 
     @Override
     public void execute(Alert alert) {
         distribute(alertMapper.toDistribution(alert));
-        incomingAlertStateMachineCacheService.fire(alertTriggers.get(Trigger.INVALID), alert, getState());
+        incomingAlertStateMachineCacheService.fire(alertTriggers.get(Trigger.INVALID), alert);
     }
 
     @Override
-            public List<Transition<State, Trigger, Alert>> getTransitions() {
-                return List.of(new Transition<>(
-                        alertTriggers.get(Trigger.INVALID),
-                        State.INVALIDATED
-                ));
-            }
+    public List<Transition<State, Trigger, Alert>> getTransitions() {
+        return List.of(new Transition<>(alertTriggers.get(Trigger.INVALID), State.INVALIDATED));
+    }
 
-            @Override
-            public TriggerWithParameters1<Alert, Trigger> getEntryTrigger() {
-                return alertTriggers.get(Trigger.NEXT);
-            }
+    @Override
+    public TriggerWithParameters1<Alert, Trigger> getEntryTrigger() {
+        return alertTriggers.get(Trigger.NEXT);
+    }
 
-            @Override
-            public List<Trigger> ignoreTriggers() {
-                return List.of();
-            }
+    @Override
+    public List<Trigger> ignoreTriggers() {
+        return List.of();
+    }
 
     public void distribute(AlertDistribution alertDistribution) {
         log.info("distributing alert: {}", alertDistribution.getIncidentId());
         zofarimService.sendRequest(alertDistribution);
-    }
-
-    public void sendCancellationToClients(int incidentId) {
-        log.info("sending cancellation to clients");
-        socketIOSender.sendCancellationToAll(incidentId);
     }
 }

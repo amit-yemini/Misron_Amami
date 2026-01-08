@@ -16,6 +16,8 @@ public class AlertDistribution {
     @NotNull
     @Positive
     private Integer identifier;
+    @JsonProperty
+    private String sender = "MisronAmami";
     @JsonProperty("sent")
     @NotNull
     private Long timeSent;

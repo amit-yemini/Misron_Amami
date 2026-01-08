@@ -17,7 +17,7 @@ public class AlertTypeCacheService {
     @Autowired
     private Cache<Integer, AlertType> alertTypeCache;
 
-    public AlertType getAlertTypeByCategoryAndEvent(AlertCategory category, AlertEvent event) {
+    public AlertType getAlertTypeByCategoryAndEvent(AlertCategory category, AlertEvent event, Alert alert) {
         List<AlertType> found;
         Query<AlertType> query = alertTypeCache.query(
                 "FROM msa.DBEntities.AlertType " +
@@ -33,7 +33,7 @@ public class AlertTypeCacheService {
                     + category
                     + " and event "
                     + event +
-                    " not found");
+                    " not found", alert);
         }
 
         return found.getFirst();

@@ -24,15 +24,15 @@ public class AlertStateCacheService{
         if (alertContextCache.containsKey(getKey(alert))) {
             incomingAlertStateMachineCacheService
                     .fire(alertTriggers.get(Trigger.INVALID),
-                            alertContextCache.get(getKey(alert)).getAlert(), state);
+                            alertContextCache.get(getKey(alert)).getAlert());
         }
         alertContextCache.put(getKey(alert), new AlertContext(alert, state));
     }
 
-    public void checkAlertRelevance(int incidentId) {
+    public void checkAlertRelevance(int incidentId, Alert alert) {
         if (alertContextCache.containsKey(incidentId)) {
             if (alertContextCache.get(incidentId).getState() == State.INVALIDATED) {
-                throw new AlertDiscreditedException(incidentId);
+                throw new AlertDiscreditedException(incidentId, alert);
             }
         }
     }

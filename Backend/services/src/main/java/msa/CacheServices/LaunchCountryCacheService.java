@@ -1,5 +1,6 @@
 package msa.CacheServices;
 
+import msa.Alert;
 import msa.DBEntities.LaunchCountry;
 import msa.NotFoundException;
 import org.infinispan.Cache;
@@ -14,7 +15,7 @@ public class LaunchCountryCacheService {
     @Autowired
     private Cache<Integer, LaunchCountry> launchCountryCache;
 
-    public LaunchCountry getLaunchCountryByExternalId(int externalId) {
+    public LaunchCountry getLaunchCountryByExternalId(int externalId, Alert alert) {
         Query<LaunchCountry> query = launchCountryCache.query(
                 "FROM msa.DBEntities.LaunchCountry " +
                         "WHERE externalId = :externalId");
@@ -23,7 +24,7 @@ public class LaunchCountryCacheService {
         List<LaunchCountry> found = query.execute().list();
 
         if (found.isEmpty()) {
-            throw new NotFoundException("msa.Launch Country with external id " + externalId + " not found");
+            throw new NotFoundException("msa.Launch Country with external id " + externalId + " not found", alert);
         }
 
         return found.getFirst();

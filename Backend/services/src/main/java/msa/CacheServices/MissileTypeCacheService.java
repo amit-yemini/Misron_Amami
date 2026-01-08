@@ -1,5 +1,6 @@
 package msa.CacheServices;
 
+import msa.Alert;
 import msa.DBEntities.MissileType;
 import msa.NotFoundException;
 import org.infinispan.Cache;
@@ -14,7 +15,7 @@ public class MissileTypeCacheService {
     @Autowired
     private Cache<Integer, MissileType> missileTypeCache;
 
-    public MissileType getMissileTypeByExternalId(int externalMissileId) {
+    public MissileType getMissileTypeByExternalId(int externalMissileId, Alert alert) {
         Query<MissileType> query = missileTypeCache.query(
                 "FROM msa.DBEntities.MissileType " +
                         "WHERE externalId = :externalId");
@@ -23,7 +24,7 @@ public class MissileTypeCacheService {
         List<MissileType> found = query.execute().list();
 
         if (found.isEmpty()) {
-            throw new NotFoundException("Missile Type with external id " + externalMissileId + " not found");
+            throw new NotFoundException("Missile Type with external id " + externalMissileId + " not found", alert);
         }
 
         return found.getFirst();

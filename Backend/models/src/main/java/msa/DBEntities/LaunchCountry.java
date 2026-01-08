@@ -11,18 +11,16 @@ import org.infinispan.protostream.annotations.ProtoField;
 @Entity
 @Indexed
 @Data
-public class LaunchCountry implements BaseEntity<Integer> {
-    @Id
-    @GeneratedValue
-    private Integer id;
+public class LaunchCountry extends BaseEntity {
     @Column
     private String name;
     @Column
     private int externalId;
 
+    @Override
     @ProtoField(number = 1, defaultValue = "0")
     public Integer getId() {
-        return id;
+        return super.id;
     }
     @ProtoField(2)
     public String getName() {

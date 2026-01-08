@@ -21,10 +21,7 @@ import java.util.Set;
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "id"
 )
-public class AlertType implements BaseEntity<Integer> {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class AlertType extends BaseEntity {
     @Column
     private String name;
     @Column
@@ -35,14 +32,6 @@ public class AlertType implements BaseEntity<Integer> {
     private AlertEvent event;
     @Column
     private int distributionTime;
-
-//    @ElementCollection(fetch = FetchType.EAGER)
-//    @CollectionTable(
-//            name = "alert_to_missile",
-//            joinColumns = @JoinColumn(name = "alert_type_id")
-//    )
-//    @Column(name = "missile_type_id")
-//    private Set<Integer> relatedMissileIds = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -55,9 +44,10 @@ public class AlertType implements BaseEntity<Integer> {
     @JsonIgnoreProperties("relatedAlertTypes")
     private Set<MissileType> relatedMissileTypes = new HashSet<>();
 
+    @Override
     @ProtoField(number = 1, defaultValue = "0")
     public Integer getId() {
-        return id;
+        return super.id;
     }
     @ProtoField(2)
     public String getName() {
@@ -77,10 +67,6 @@ public class AlertType implements BaseEntity<Integer> {
     public int getDistributionTime() {
         return distributionTime;
     }
-//    @ProtoField(6)
-//    public Set<Integer> getRelatedMissileIds() {
-//        return relatedMissileIds;
-//    }
     @ProtoField(6)
     public Set<MissileType> getRelatedMissileTypes() {
         return relatedMissileTypes;

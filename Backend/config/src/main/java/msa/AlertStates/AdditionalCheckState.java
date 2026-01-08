@@ -42,13 +42,13 @@ public class AdditionalCheckState extends BaseAlertState {
     public void execute(Alert alert) {
         log.info("starting additional check for alert: incident: {}, identifier: {}",
                 alert.getIncidentId(), alert.getIdentifier());
-        checkSendTime(alert.getTimeSent());
-        checkImpactTime(alert.getImpact().getTime());
-        checkAlertRelevance(alert.getIncidentId());
+        checkSendTime(alert.getTimeSent(), alert);
+        checkImpactTime(alert.getImpact().getTime(), alert);
+        checkAlertRelevance(alert.getIncidentId(), alert);
         addAlertStateMachineFromIncomingCache(alert);
         int delayTime = calculateInterventionTime(alert.getImpact().getTime(), alert.getAlertTypeId());
         if (delayTime <= 0) {
-            incomingAlertStateMachineCacheService.fire(alertTriggers.get(Trigger.NEXT), alert, getState());
+            incomingAlertStateMachineCacheService.fire(alertTriggers.get(Trigger.NEXT), alert);
         } else {
             sendAlertToClients(alertMapper.toDistribution(alert));
             scheduleWaitExpired(alert, delayTime);
@@ -77,20 +77,20 @@ public class AdditionalCheckState extends BaseAlertState {
         return List.of();
     }
 
-    private void checkSendTime(long sendTime) {
+    private void checkSendTime(long sendTime, Alert alert) {
         if (!Instant.ofEpochSecond(sendTime).isBefore(Instant.now())) {
-            throw new DateTimeException("Send time must be in the past");
+            throw new TimeException("Send time must be in the past", alert);
         }
     }
 
-    private void checkImpactTime(long impactTime) {
+    private void checkImpactTime(long impactTime, Alert alert) {
         if (!Instant.ofEpochSecond(impactTime).isAfter(Instant.now())) {
-            throw new DateTimeException("msa.Impact time must be in the future");
+            throw new TimeException("Impact time must be in the future", alert);
         }
     }
 
-    private void checkAlertRelevance(int incidentId) throws AlertDiscreditedException {
-        alertStateCacheService.checkAlertRelevance(incidentId);
+    private void checkAlertRelevance(int incidentId, Alert alert) throws AlertDiscreditedException {
+        alertStateCacheService.checkAlertRelevance(incidentId, alert);
     }
 
     public int calculateInterventionTime(long impactTime, int alertTypeId) {
@@ -122,6 +122,6 @@ public class AdditionalCheckState extends BaseAlertState {
     private void onWaitExpired(Alert alert) {
         log.info("sending cancellation to clients");
         socketIOSender.sendCancellationToAll(alert.getIncidentId());
-        incomingAlertStateMachineCacheService.fire(alertTriggers.get(Trigger.NEXT), alert, getState());
+        incomingAlertStateMachineCacheService.fire(alertTriggers.get(Trigger.NEXT), alert);
     }
 }

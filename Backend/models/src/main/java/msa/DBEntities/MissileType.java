@@ -23,11 +23,7 @@ import java.util.Set;
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "id"
 )
-public class MissileType implements BaseEntity<Integer> {
-    @Id
-    @EqualsAndHashCode.Include
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class MissileType extends BaseEntity {
     @Column
     private String name;
     @Column
@@ -38,9 +34,10 @@ public class MissileType implements BaseEntity<Integer> {
     @JsonIgnoreProperties("relatedMissileTypes")
     private Set<AlertType> relatedAlertTypes = new HashSet<>();
 
+    @Override
     @ProtoField(number = 1, defaultValue = "0")
     public Integer getId() {
-        return id;
+        return super.id;
     }
     @ProtoField(2)
     public String getName() {
