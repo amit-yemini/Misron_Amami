@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class InitialState extends ActionlessBaseAlertState {
+public class InitialState implements BaseStateDefinition<State, Trigger, Alert> {
     @Autowired
     private AlertTriggers alertTriggers;
 
@@ -20,11 +20,11 @@ public class InitialState extends ActionlessBaseAlertState {
     public List<Transition<State, Trigger, Alert>> getTransitions() {
         return List.of(
                 new Transition<>(
-                        alertTriggers.get(Trigger.START_AUTO),
+                        Trigger.START_AUTO,
                         State.SANITY_CHECK
                 ),
                 new Transition<>(
-                        alertTriggers.get(Trigger.START_MANUAL),
+                        Trigger.START_MANUAL,
                         State.DISTRIBUTION
                 )
         );

@@ -3,8 +3,8 @@ package msa.AlertStates;
 import com.github.oxo42.stateless4j.triggers.TriggerWithParameters1;
 import lombok.extern.slf4j.Slf4j;
 import msa.*;
+import msa.AlertStateMachineService;
 import msa.CacheServices.AlertTypeCacheService;
-import msa.CacheServices.IncomingAlertStateMachineCacheService;
 import msa.CacheServices.LaunchCountryCacheService;
 import msa.CacheServices.MissileTypeCacheService;
 import msa.DBEntities.AlertCategory;
@@ -26,7 +26,7 @@ public class SanityCheckState extends BaseAlertState {
     @Autowired
     private MissileTypeCacheService missileTypeCacheService;
     @Autowired
-    private IncomingAlertStateMachineCacheService incomingAlertStateMachineCacheService;
+    private AlertStateMachineService alertStateMachineService;
     @Autowired
     private AlertTriggers alertTriggers;
 
@@ -43,18 +43,18 @@ public class SanityCheckState extends BaseAlertState {
         alert.setAlertTypeId(getAlertType(alert.getCategory(), alert.getEvent(), alert));
         checkAlertToMissileMatch(alert.getAlertTypeId(), alert.getMissileType(), alert);
         checkSender(alert.getSender(), alert);
-        incomingAlertStateMachineCacheService.fire(alertTriggers.get(Trigger.NEXT), alert);
+        alertStateMachineService.fire(alertTriggers.get(Trigger.NEXT), alert);
     }
 
     @Override
     public List<Transition<State, Trigger, Alert>> getTransitions() {
         return List.of(
                 new Transition<>(
-                        alertTriggers.get(Trigger.NEXT),
+                        Trigger.NEXT,
                         State.ADDITIONAL_CHECK
                 ),
                 new Transition<>(
-                        alertTriggers.get(Trigger.INVALID),
+                        Trigger.INVALID,
                         State.INVALIDATED
                 )
         );

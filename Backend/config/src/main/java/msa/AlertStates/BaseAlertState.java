@@ -3,24 +3,17 @@ package msa.AlertStates;
 import com.github.oxo42.stateless4j.delegates.Action1;
 import com.github.oxo42.stateless4j.triggers.TriggerWithParameters1;
 import msa.*;
-import msa.CacheServices.AlertStateCacheService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 public abstract class BaseAlertState implements StateDefinition<State, Trigger, Alert>{
-    @Autowired
-    private AlertStateCacheService alertStateCacheService;
 
     @Override
     public abstract State getState();
 
     @Override
     public Action1<Alert> getAction() {
-        return (alert) -> {
-            alertStateCacheService.updateState(alert, getState());
-            execute(alert);
-        };
+        return this::execute;
     }
 
     public abstract void execute(Alert alert);

@@ -1,13 +1,9 @@
-package msa.CacheServices;
+package msa;
 
 import com.github.oxo42.stateless4j.StateMachine;
 import com.github.oxo42.stateless4j.StateMachineConfig;
 import com.github.oxo42.stateless4j.triggers.TriggerWithParameters1;
 import lombok.extern.slf4j.Slf4j;
-import msa.Alert;
-import msa.AlertTriggers;
-import msa.State;
-import msa.Trigger;
 import org.infinispan.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -15,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class IncomingAlertStateMachineCacheService {
+public class AlertStateMachineService {
     @Autowired
     private Cache<String, StateMachine<State, Trigger>> incomingAlertStateMachineCache;
     @Autowired

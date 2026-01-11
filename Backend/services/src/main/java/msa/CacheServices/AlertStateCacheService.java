@@ -6,13 +6,15 @@ import org.infinispan.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 @Slf4j
 public class AlertStateCacheService{
     @Autowired
     private Cache<Integer, AlertContext> alertContextCache;
     @Autowired
-    private IncomingAlertStateMachineCacheService incomingAlertStateMachineCacheService;
+    private AlertStateMachineService alertStateMachineService;
     @Autowired
     private AlertTriggers alertTriggers;
 
@@ -22,7 +24,7 @@ public class AlertStateCacheService{
 
     public void addAlertContext(Alert alert, State state) {
         if (alertContextCache.containsKey(getKey(alert))) {
-            incomingAlertStateMachineCacheService
+            alertStateMachineService
                     .fire(alertTriggers.get(Trigger.INVALID),
                             alertContextCache.get(getKey(alert)).getAlert());
         }
@@ -38,7 +40,9 @@ public class AlertStateCacheService{
     }
 
     public void updateState(Alert alert, State state) {
-        if (alertContextCache.containsKey(getKey(alert))) {
+        if (alertContextCache.containsKey(getKey(alert))
+                && Objects.equals(alert.getIdentifier(), alertContextCache.get(getKey(alert)).getAlert().getIdentifier())) {
+            log.info("updating state of alert {} to {}", getKey(alert), state);
             alertContextCache.get(getKey(alert)).setState(state);
         }
     }

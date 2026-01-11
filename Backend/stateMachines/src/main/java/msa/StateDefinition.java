@@ -7,10 +7,7 @@ import com.github.oxo42.stateless4j.triggers.TriggerWithParameters2;
 
 import java.util.List;
 
-public interface StateDefinition<S, T, Arg> {
-    S getState();
+public interface StateDefinition<S, T, Arg> extends BaseStateDefinition<S, T, Arg> {
     Action1<Arg> getAction();
-    List<Transition<S, T, Arg>> getTransitions();
     TriggerWithParameters1<Arg, T> getEntryTrigger();
-    List<T> ignoreTriggers();
 }

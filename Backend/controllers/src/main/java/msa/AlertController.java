@@ -1,6 +1,5 @@
 package msa;
 
-import msa.CacheServices.IncomingAlertStateMachineCacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,11 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/services/alerts")
 public class AlertController {
     @Autowired
-    private IncomingAlertStateMachineCacheService incomingAlertStateMachineCacheService;
+    private AlertStateMachineService alertStateMachineService;
 
     @PostMapping("/in")
     public ResponseEntity<Object> newAlert(@RequestBody Alert alert) {
-        incomingAlertStateMachineCacheService.addIncomingAlert(alert);
+        alertStateMachineService.addIncomingAlert(alert);
 
         return new ResponseEntity<>("Alert in", HttpStatus.OK);
     }

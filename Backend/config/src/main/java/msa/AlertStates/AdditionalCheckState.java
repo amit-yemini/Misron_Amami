@@ -5,12 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import msa.*;
 import msa.CacheServices.AlertStateCacheService;
 import msa.CacheServices.AlertTypeCacheService;
-import msa.CacheServices.IncomingAlertStateMachineCacheService;
 import msa.mappers.AlertMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.DateTimeException;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -20,10 +18,11 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public class AdditionalCheckState extends BaseAlertState {
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     @Autowired
     private AlertTypeCacheService alertTypeCacheService;
     @Autowired
-    private IncomingAlertStateMachineCacheService incomingAlertStateMachineCacheService;
+    private AlertStateMachineService alertStateMachineService;
     @Autowired
     private AlertStateCacheService alertStateCacheService;
     @Autowired
@@ -44,25 +43,35 @@ public class AdditionalCheckState extends BaseAlertState {
                 alert.getIncidentId(), alert.getIdentifier());
         checkSendTime(alert.getTimeSent(), alert);
         checkImpactTime(alert.getImpact().getTime(), alert);
-        checkAlertRelevance(alert.getIncidentId(), alert);
+        alertStateCacheService.checkAlertRelevance(alert.getIncidentId(), alert);
         addAlertStateMachineFromIncomingCache(alert);
-        int delayTime = calculateInterventionTime(alert.getImpact().getTime(), alert.getAlertTypeId());
-        if (delayTime <= 0) {
-            incomingAlertStateMachineCacheService.fire(alertTriggers.get(Trigger.NEXT), alert);
+        int interventionTime = calculateInterventionTime(alert.getImpact().getTime(), alert.getAlertTypeId());
+        if (interventionTime <= 0) {
+            alertStateMachineService.fire(alertTriggers.get(Trigger.NEXT), alert);
         } else {
             sendAlertToClients(alertMapper.toDistribution(alert));
-            scheduleWaitExpired(alert, delayTime);
+            log.info("scheduling wait period of {} seconds for alert: incident: {}, identifier: {}",
+                    interventionTime, alert.getIncidentId(), alert.getIdentifier());
+            scheduler.schedule(
+                    () -> {
+                        log.info("sending cancellation to clients for alert {}_{}", alert.getIncidentId(), alert.getIdentifier());
+                        socketIOSender.sendCancellationToAll(alert.getIncidentId());
+                        alertStateMachineService.fire(alertTriggers.get(Trigger.NEXT), alert);
+                    },
+                    interventionTime,
+                    TimeUnit.SECONDS
+            );
         }
     }
 
     @Override
     public List<Transition<State, Trigger, Alert>> getTransitions() {
         return List.of(new Transition<>(
-                alertTriggers.get(Trigger.NEXT),
-                State.DISTRIBUTION
-        ),
+                        Trigger.NEXT,
+                        State.DISTRIBUTION
+                ),
                 new Transition<>(
-                        alertTriggers.get(Trigger.INVALID),
+                        Trigger.INVALID,
                         State.INVALIDATED)
         );
     }
@@ -89,10 +98,6 @@ public class AdditionalCheckState extends BaseAlertState {
         }
     }
 
-    private void checkAlertRelevance(int incidentId, Alert alert) throws AlertDiscreditedException {
-        alertStateCacheService.checkAlertRelevance(incidentId, alert);
-    }
-
     public int calculateInterventionTime(long impactTime, int alertTypeId) {
         int distributionTime = alertTypeCacheService.getDistributionTime(alertTypeId);
 
@@ -106,22 +111,5 @@ public class AdditionalCheckState extends BaseAlertState {
     public void sendAlertToClients(AlertDistribution alertDistribution) {
         log.info("sending alert to clients");
         socketIOSender.sendAlertToAll(alertDistribution);
-    }
-
-    private final ScheduledExecutorService scheduler =
-            Executors.newScheduledThreadPool(2);
-
-    public void scheduleWaitExpired(Alert alert, int delaySeconds) {
-        log.info("scheduling wait period of {} seconds for alert: incident: {}, identifier: {}",
-                delaySeconds, alert.getIncidentId(), alert.getIdentifier());
-        scheduler.schedule(
-                () -> onWaitExpired(alert), delaySeconds, TimeUnit.SECONDS
-        );
-    }
-
-    private void onWaitExpired(Alert alert) {
-        log.info("sending cancellation to clients");
-        socketIOSender.sendCancellationToAll(alert.getIncidentId());
-        incomingAlertStateMachineCacheService.fire(alertTriggers.get(Trigger.NEXT), alert);
     }
 }

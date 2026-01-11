@@ -3,26 +3,32 @@ package msa.AlertStates;
 import com.github.oxo42.stateless4j.triggers.TriggerWithParameters1;
 import lombok.extern.slf4j.Slf4j;
 import msa.*;
-import msa.CacheServices.IncomingAlertStateMachineCacheService;
+import msa.CacheServices.AlertTypeCacheService;
 import msa.mappers.AlertMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
 public class DistributionState extends BaseAlertState {
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     @Autowired
     private ZofarimService zofarimService;
     @Autowired
     private SocketIOSender socketIOSender;
     @Autowired
-    private IncomingAlertStateMachineCacheService incomingAlertStateMachineCacheService;
+    private AlertStateMachineService alertStateMachineService;
     @Autowired
     private AlertTriggers alertTriggers;
     @Autowired
     private AlertMapper alertMapper;
+    @Autowired
+    private AlertTypeCacheService alertTypeCacheService;
 
     @Override
     public State getState() {
@@ -32,12 +38,17 @@ public class DistributionState extends BaseAlertState {
     @Override
     public void execute(Alert alert) {
         distribute(alertMapper.toDistribution(alert));
-        incomingAlertStateMachineCacheService.fire(alertTriggers.get(Trigger.INVALID), alert);
+        scheduler.schedule(
+                () -> alertStateMachineService.fire(alertTriggers.get(Trigger.INVALID), alert),
+                alertTypeCacheService.getDistributionTime(alert.getAlertTypeId()),
+                TimeUnit.SECONDS
+        );
+//        alertStateMachineService.fire(alertTriggers.get(Trigger.INVALID), alert);
     }
 
     @Override
     public List<Transition<State, Trigger, Alert>> getTransitions() {
-        return List.of(new Transition<>(alertTriggers.get(Trigger.INVALID), State.INVALIDATED));
+        return List.of(new Transition<>(Trigger.INVALID, State.INVALIDATED));
     }
 
     @Override

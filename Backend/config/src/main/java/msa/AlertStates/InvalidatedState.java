@@ -2,7 +2,7 @@ package msa.AlertStates;
 
 import com.github.oxo42.stateless4j.triggers.TriggerWithParameters1;
 import msa.*;
-import msa.CacheServices.IncomingAlertStateMachineCacheService;
+import msa.AlertStateMachineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +13,7 @@ public class InvalidatedState extends BaseAlertState {
     @Autowired
     private AlertTriggers alertTriggers;
     @Autowired
-    private IncomingAlertStateMachineCacheService incomingAlertStateMachineCacheService;
+    private AlertStateMachineService alertStateMachineService;
 
     @Override
     public State getState() {
@@ -22,7 +22,7 @@ public class InvalidatedState extends BaseAlertState {
 
     @Override
     public void execute(Alert alert) {
-        incomingAlertStateMachineCacheService.removeStateMachine(alert);
+        alertStateMachineService.removeStateMachine(alert);
     }
 
     @Override
