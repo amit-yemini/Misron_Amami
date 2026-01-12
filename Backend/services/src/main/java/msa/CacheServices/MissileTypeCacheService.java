@@ -16,17 +16,16 @@ public class MissileTypeCacheService {
     private Cache<Integer, MissileType> missileTypeCache;
 
     public MissileType getMissileTypeByExternalId(int externalMissileId, Alert alert) {
-        Query<MissileType> query = missileTypeCache.query(
-                "FROM msa.DBEntities.MissileType " +
-                        "WHERE externalId = :externalId");
-
-        query.setParameter("externalId", externalMissileId);
-        List<MissileType> found = query.execute().list();
-
-        if (found.isEmpty()) {
-            throw new NotFoundException("Missile Type with external id " + externalMissileId + " not found", alert);
-        }
-
-        return found.getFirst();
+        return missileTypeCache.values().stream()
+                .filter(missileType -> missileType.getExternalId() == externalMissileId)
+                .findFirst()
+                .orElseThrow(() ->
+                        new NotFoundException(
+                                "Missile Type with external id "
+                                        + externalMissileId
+                                        + " not found",
+                                alert
+                        )
+                );
     }
 }

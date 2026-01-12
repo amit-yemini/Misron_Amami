@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class AlertTypeCacheService {
@@ -18,25 +19,18 @@ public class AlertTypeCacheService {
     private Cache<Integer, AlertType> alertTypeCache;
 
     public AlertType getAlertTypeByCategoryAndEvent(AlertCategory category, AlertEvent event, Alert alert) {
-        List<AlertType> found;
-        Query<AlertType> query = alertTypeCache.query(
-                "FROM msa.DBEntities.AlertType " +
-                        "WHERE category = :category AND event = :event");
-
-        query.setParameter("category", category);
-        query.setParameter("event", event);
-
-        found = query.execute().list();
-
-        if (found.isEmpty()) {
-            throw new NotFoundException("msa.Alert Type with category "
-                    + category
-                    + " and event "
-                    + event +
-                    " not found", alert);
-        }
-
-        return found.getFirst();
+        return alertTypeCache.values().stream()
+                .filter(alertType -> alertType.getCategory() == category)
+                .filter(alertType -> alertType.getEvent() == event)
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(
+                        "Alert Type with category "
+                                + category
+                                + " and event "
+                                + event
+                                + " not found",
+                        alert
+                ));
     }
 
     public boolean isAlertTypeConnectedToMissile(int alertTypeId, int missileId) {
@@ -45,9 +39,11 @@ public class AlertTypeCacheService {
     }
 
     public int getDistributionTime(int alertTypeId) {
-        Query<AlertType> query = alertTypeCache.query("FROM msa.DBEntities.AlertType WHERE id = :id");
-        query.setParameter("id", alertTypeId);
-        AlertType alertType = query.execute().list().getFirst();
+        AlertType alertType = alertTypeCache.values().stream()
+                .filter(type -> Objects.equals(type.getId(), alertTypeId))
+                .findFirst()
+                .orElseThrow();
+
         return alertType.getDistributionTime();
     }
 }

@@ -38,12 +38,7 @@ public class DistributionState extends BaseAlertState {
     @Override
     public void execute(Alert alert) {
         distribute(alertMapper.toDistribution(alert));
-        scheduler.schedule(
-                () -> alertStateMachineService.fire(alertTriggers.get(Trigger.INVALID), alert),
-                alertTypeCacheService.getDistributionTime(alert.getAlertTypeId()),
-                TimeUnit.SECONDS
-        );
-//        alertStateMachineService.fire(alertTriggers.get(Trigger.INVALID), alert);
+        alertStateMachineService.fire(Trigger.INVALID, alert);
     }
 
     @Override

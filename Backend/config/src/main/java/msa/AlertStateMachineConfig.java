@@ -12,7 +12,9 @@ import java.util.List;
 @Configuration
 public class AlertStateMachineConfig {
     @Autowired
-    private List<BaseStateDefinition<State, Trigger, Alert>> stateDefinitions;
+    private List<BaseStateDefinition<State, Trigger, Alert>> baseStateDefinitions;
+    @Autowired
+    private List<StateDefinition<State, Trigger, Alert>> stateDefinitions;
 
     @Autowired
     private AlertTriggers alertTriggers;
@@ -29,33 +31,42 @@ public class AlertStateMachineConfig {
 
         alertTriggers.initialize(config);
 
-        stateDefinitions.forEach(baseStateDefinition -> {
+        baseStateDefinitions.forEach(baseStateDefinition -> {
             StateConfiguration<State, Trigger> stateConfiguration =
                     config.configure(baseStateDefinition.getState());
+            configTransitions(baseStateDefinition, stateConfiguration);
+            configIgnoreTriggers(baseStateDefinition, stateConfiguration);
+        });
 
-
-            if (baseStateDefinition instanceof StateDefinition<State, Trigger, Alert> stateDefinition) {
-                stateConfiguration.onEntryFrom(
-                        stateDefinition.getEntryTrigger(),
-                        (alert) -> {
-                            alertStateCacheService.updateState(alert, stateDefinition.getState());
-                            circuitBreakerExecutor.execute(
-                                    () -> stateDefinition.getAction().doIt(alert)
-                            );
-                        });
-            }
-
-
-            if (baseStateDefinition.getTransitions() != null && !baseStateDefinition.getTransitions().isEmpty()) {
-                baseStateDefinition.getTransitions().forEach(transition ->
-                        stateConfiguration.permitDynamic(alertTriggers.get(transition.trigger), transition.destinationStateSelector));
-            }
-
-            if (baseStateDefinition.ignoreTriggers() != null && !baseStateDefinition.ignoreTriggers().isEmpty()) {
-                baseStateDefinition.ignoreTriggers().forEach(stateConfiguration::ignore);
-            }
+        stateDefinitions.forEach(stateDefinition ->
+        {
+            configAction(stateDefinition, config.configure(stateDefinition.getState()));
         });
 
         return config;
+    }
+
+    private void configTransitions(BaseStateDefinition<State, Trigger, Alert> baseStateDefinition, StateConfiguration<State, Trigger> stateConfiguration) {
+        if (baseStateDefinition.getTransitions() != null && !baseStateDefinition.getTransitions().isEmpty()) {
+            baseStateDefinition.getTransitions().forEach(transition ->
+                    stateConfiguration.permitDynamic(alertTriggers.get(transition.trigger), transition.destinationStateSelector));
+        }
+    }
+
+    private void configIgnoreTriggers(BaseStateDefinition<State, Trigger, Alert> baseStateDefinition, StateConfiguration<State, Trigger> stateConfiguration) {
+        if (baseStateDefinition.ignoreTriggers() != null && !baseStateDefinition.ignoreTriggers().isEmpty()) {
+            baseStateDefinition.ignoreTriggers().forEach(stateConfiguration::ignore);
+        }
+    }
+
+    private void configAction(StateDefinition<State, Trigger, Alert> stateDefinition, StateConfiguration<State, Trigger> stateConfiguration) {
+        stateConfiguration.onEntryFrom(
+                stateDefinition.getEntryTrigger(),
+                (alert) -> {
+                    alertStateCacheService.updateState(alert, stateDefinition.getState());
+                    circuitBreakerExecutor.execute(
+                            () -> stateDefinition.getAction().doIt(alert)
+                    );
+                });
     }
 }

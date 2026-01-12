@@ -25,7 +25,7 @@ public class AlertStateCacheService{
     public void addAlertContext(Alert alert, State state) {
         if (alertContextCache.containsKey(getKey(alert))) {
             alertStateMachineService
-                    .fire(alertTriggers.get(Trigger.INVALID),
+                    .fire(Trigger.INVALID,
                             alertContextCache.get(getKey(alert)).getAlert());
         }
         alertContextCache.put(getKey(alert), new AlertContext(alert, state));
@@ -40,10 +40,14 @@ public class AlertStateCacheService{
     }
 
     public void updateState(Alert alert, State state) {
-        if (alertContextCache.containsKey(getKey(alert))
-                && Objects.equals(alert.getIdentifier(), alertContextCache.get(getKey(alert)).getAlert().getIdentifier())) {
-            log.info("updating state of alert {} to {}", getKey(alert), state);
-            alertContextCache.get(getKey(alert)).setState(state);
+        if (alertContextCache.containsKey(getKey(alert))) {
+            AlertContext AlertContext = alertContextCache.get(getKey(alert));
+
+            if (alert.getIdentifier().equals(AlertContext.getAlert().getIdentifier())) {
+                log.info("updating state of alert {} to {}", getKey(alert), state);
+                AlertContext.setState(state);
+            }
+
         }
     }
 }

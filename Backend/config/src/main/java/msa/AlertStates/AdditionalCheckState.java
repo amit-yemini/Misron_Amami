@@ -11,14 +11,10 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
 public class AdditionalCheckState extends BaseAlertState {
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     @Autowired
     private AlertTypeCacheService alertTypeCacheService;
     @Autowired
@@ -44,23 +40,18 @@ public class AdditionalCheckState extends BaseAlertState {
         checkSendTime(alert.getTimeSent(), alert);
         checkImpactTime(alert.getImpact().getTime(), alert);
         alertStateCacheService.checkAlertRelevance(alert.getIncidentId(), alert);
-        addAlertStateMachineFromIncomingCache(alert);
+        alertStateCacheService.addAlertContext(alert, getState());
         int interventionTime = calculateInterventionTime(alert.getImpact().getTime(), alert.getAlertTypeId());
+
         if (interventionTime <= 0) {
-            alertStateMachineService.fire(alertTriggers.get(Trigger.NEXT), alert);
+            alertStateMachineService.fire(Trigger.NEXT, alert);
         } else {
             sendAlertToClients(alertMapper.toDistribution(alert));
             log.info("scheduling wait period of {} seconds for alert: incident: {}, identifier: {}",
                     interventionTime, alert.getIncidentId(), alert.getIdentifier());
-            scheduler.schedule(
-                    () -> {
-                        log.info("sending cancellation to clients for alert {}_{}", alert.getIncidentId(), alert.getIdentifier());
-                        socketIOSender.sendCancellationToAll(alert.getIncidentId());
-                        alertStateMachineService.fire(alertTriggers.get(Trigger.NEXT), alert);
-                    },
-                    interventionTime,
-                    TimeUnit.SECONDS
-            );
+            alertStateMachineService.fireWithDelay(Trigger.NEXT, alert, interventionTime, () -> {
+                socketIOSender.sendCancellationToAll(alert.getIncidentId());
+            });
         }
     }
 
@@ -102,10 +93,6 @@ public class AdditionalCheckState extends BaseAlertState {
         int distributionTime = alertTypeCacheService.getDistributionTime(alertTypeId);
 
         return Math.toIntExact(impactTime - Instant.now().getEpochSecond() - distributionTime);
-    }
-
-    private void addAlertStateMachineFromIncomingCache(Alert alert) {
-        alertStateCacheService.addAlertContext(alert, getState());
     }
 
     public void sendAlertToClients(AlertDistribution alertDistribution) {

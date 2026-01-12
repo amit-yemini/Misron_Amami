@@ -43,7 +43,7 @@ public class SanityCheckState extends BaseAlertState {
         alert.setAlertTypeId(getAlertType(alert.getCategory(), alert.getEvent(), alert));
         checkAlertToMissileMatch(alert.getAlertTypeId(), alert.getMissileType(), alert);
         checkSender(alert.getSender(), alert);
-        alertStateMachineService.fire(alertTriggers.get(Trigger.NEXT), alert);
+        alertStateMachineService.fire(Trigger.NEXT, alert);
     }
 
     @Override

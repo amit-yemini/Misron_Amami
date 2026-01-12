@@ -1,7 +1,6 @@
 package msa;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,10 +16,10 @@ public class CircuitBreakerExecutor {
         action.run();
     }
 
-    public void executeFallback(Throwable t) {
-        log.error("Circuit breaker activated: {}", t.getMessage());
-        if (t instanceof AlertProcessingException e) {
-            alertStateMachineService.handleErrorInStateMachine(e.getAlert());
+    public void executeFallback(Throwable throwable) {
+        log.error("Circuit breaker activated: {}", throwable.getMessage());
+        if (throwable instanceof AlertProcessingException exception) {
+            alertStateMachineService.handleErrorInStateMachine(exception.getAlert());
         }
     }
 }

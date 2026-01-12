@@ -16,17 +16,16 @@ public class LaunchCountryCacheService {
     private Cache<Integer, LaunchCountry> launchCountryCache;
 
     public LaunchCountry getLaunchCountryByExternalId(int externalId, Alert alert) {
-        Query<LaunchCountry> query = launchCountryCache.query(
-                "FROM msa.DBEntities.LaunchCountry " +
-                        "WHERE externalId = :externalId");
-
-        query.setParameter("externalId", externalId);
-        List<LaunchCountry> found = query.execute().list();
-
-        if (found.isEmpty()) {
-            throw new NotFoundException("msa.Launch Country with external id " + externalId + " not found", alert);
-        }
-
-        return found.getFirst();
+        return launchCountryCache.values().stream()
+                .filter(launchCountry -> launchCountry.getExternalId() == externalId)
+                .findFirst()
+                .orElseThrow(() ->
+                        new NotFoundException(
+                                "Launch Country with external id "
+                                        + externalId
+                                        + " not found",
+                                alert
+                        )
+                );
     }
 }
