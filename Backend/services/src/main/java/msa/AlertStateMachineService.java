@@ -3,6 +3,7 @@ package msa;
 import com.github.oxo42.stateless4j.StateMachine;
 import com.github.oxo42.stateless4j.StateMachineConfig;
 import lombok.extern.slf4j.Slf4j;
+import msa.CacheServices.AlertStateCacheService;
 import org.infinispan.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -22,6 +23,8 @@ public class AlertStateMachineService {
     @Autowired
     @Lazy
     private StateMachineConfig<State, Trigger> stateMachineConfig;
+    @Autowired
+    private AlertStateCacheService alertStateCacheService;
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
 
@@ -63,5 +66,10 @@ public class AlertStateMachineService {
     public void handleErrorInStateMachine(Alert alert) {
         log.info("firing trigger INVALID for alert {} because of an error in state machine", getKey(alert));
         alertStateMachineCache.get(getKey(alert)).fire(alertTriggers.get(Trigger.INVALID), alert);
+    }
+
+    public void cancelAlert(int incidentId) {
+        Alert alert = alertStateCacheService.getAlert(incidentId);
+        fire(Trigger.INVALID, alert);
     }
 }

@@ -16,6 +16,8 @@ public class AlertStateCacheService{
     @Autowired
     private AlertStateMachineService alertStateMachineService;
     @Autowired
+    private AlertStateCacheService alertStateCacheService;
+    @Autowired
     private AlertTriggers alertTriggers;
 
     public int getKey(Alert alert) {
@@ -49,5 +51,9 @@ public class AlertStateCacheService{
             }
 
         }
+    }
+
+    public Alert getAlert(int incidentId) {
+        return alertContextCache.get(incidentId).getAlert();
     }
 }

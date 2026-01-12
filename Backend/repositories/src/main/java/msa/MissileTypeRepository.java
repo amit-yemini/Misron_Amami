@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
+@CacheableRepository(cacheName = "missileTypeCache")
 public interface MissileTypeRepository extends JpaRepository<MissileType, Integer> {
     @EntityGraph(attributePaths = {"relatedAlertTypes"})
     List<MissileType> findAll();

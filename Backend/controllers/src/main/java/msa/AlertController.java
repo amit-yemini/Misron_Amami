@@ -3,10 +3,7 @@ package msa;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/services/alerts")
@@ -19,5 +16,12 @@ public class AlertController {
         alertStateMachineService.addIncomingAlert(alert);
 
         return new ResponseEntity<>("Alert in", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/cancel/{incidentId}")
+    public ResponseEntity<Object> cancelAlert(@PathVariable int incidentId) {
+        alertStateMachineService.cancelAlert(incidentId);
+
+        return new ResponseEntity<>("Alert cancelled", HttpStatus.OK);
     }
 }
