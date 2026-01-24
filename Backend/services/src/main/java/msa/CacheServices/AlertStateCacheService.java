@@ -6,8 +6,6 @@ import org.infinispan.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-
 @Service
 @Slf4j
 public class AlertStateCacheService{
@@ -15,10 +13,6 @@ public class AlertStateCacheService{
     private Cache<Integer, AlertContext> alertContextCache;
     @Autowired
     private AlertStateMachineService alertStateMachineService;
-    @Autowired
-    private AlertStateCacheService alertStateCacheService;
-    @Autowired
-    private AlertTriggers alertTriggers;
 
     public int getKey(Alert alert) {
         return alert.getIncidentId();

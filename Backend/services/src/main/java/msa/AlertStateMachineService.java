@@ -24,6 +24,7 @@ public class AlertStateMachineService {
     @Lazy
     private StateMachineConfig<State, Trigger> stateMachineConfig;
     @Autowired
+    @Lazy
     private AlertStateCacheService alertStateCacheService;
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);

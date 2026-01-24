@@ -35,7 +35,8 @@ public class AlertTypeCacheService {
 
     public boolean isAlertTypeConnectedToMissile(int alertTypeId, int missileId) {
         return alertTypeCache.get(alertTypeId).getRelatedMissileTypes()
-                .contains(new MissileType(missileId));
+                .stream()
+                .anyMatch(missileType -> missileType.getId() == missileId);
     }
 
     public int getDistributionTime(int alertTypeId) {

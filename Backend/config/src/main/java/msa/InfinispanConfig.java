@@ -7,6 +7,7 @@ import msa.DBEntities.MissileType;
 import msa.DBEntities.MsaSchemaImpl;
 import org.infinispan.Cache;
 import org.infinispan.manager.DefaultCacheManager;
+import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.protostream.SerializationContextInitializer;
 import org.infinispan.spring.embedded.provider.SpringEmbeddedCacheManager;
 import org.springframework.context.annotation.Bean;
@@ -16,10 +17,13 @@ import org.springframework.context.annotation.Configuration;
 public class InfinispanConfig {
 
     @Bean
-    public SpringEmbeddedCacheManager cacheManager() throws Exception {
-        DefaultCacheManager cacheManager = new DefaultCacheManager("infinispan.xml");
+    public EmbeddedCacheManager embeddedCacheManager() throws Exception {
+        return new DefaultCacheManager("infinispan.xml");
+    }
 
-        return new SpringEmbeddedCacheManager(cacheManager);
+    @Bean
+    public SpringEmbeddedCacheManager cacheManager(EmbeddedCacheManager nativeManager) {
+        return new SpringEmbeddedCacheManager(nativeManager);
     }
 
     @Bean

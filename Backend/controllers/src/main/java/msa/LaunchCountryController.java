@@ -1,15 +1,21 @@
 package msa;
 
+import jakarta.persistence.EntityNotFoundException;
+import msa.CacheServices.AlertTypeCacheService;
+import msa.CacheServices.MissileTypeCacheService;
 import msa.DBEntities.AlertType;
 import msa.DBEntities.LaunchCountry;
 import msa.DBEntities.MissileType;
+import msa.mappers.MissileTypeMapper;
 import org.infinispan.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/")
@@ -20,6 +26,17 @@ public class LaunchCountryController {
     private Cache<Integer, AlertType> alertTypeCache;
     @Autowired
     private Cache<Integer, MissileType> missileTypeCache;
+    @Autowired
+    private MissileTypeRepository missileTypeRepository;
+    @Autowired
+    private AlertTypeRepository alertTypeRepository;
+    @Autowired
+    private MissileTypeMapper missileTypeMapper;
+
+    @Autowired
+    private MissileTypeCacheService missileTypeCacheService;
+    @Autowired
+    private AlertTypeCacheService alertTypeCacheService;
 
     @GetMapping("countries")
     public ResponseEntity<Object> getCountries() {
@@ -33,7 +50,30 @@ public class LaunchCountryController {
 
     @GetMapping("missiles")
     public ResponseEntity<Object> getMissiles() {
-        System.out.println(missileTypeCache);
         return new ResponseEntity<>(missileTypeCache, HttpStatus.OK);
+    }
+
+    @DeleteMapping("missile/{missileTypeId}")
+    @Transactional
+    public ResponseEntity<Object> deleteMissile(@PathVariable int missileTypeId) {
+        missileTypeRepository.deleteById(missileTypeId);
+
+        return ResponseEntity.ok("deleted");
+    }
+
+    @DeleteMapping("alert/{alertTypeId}")
+    @Transactional
+    public ResponseEntity<Object> deleteAlert(@PathVariable int alertTypeId) {
+        alertTypeRepository.deleteById(alertTypeId);
+
+        return ResponseEntity.ok("deleted");
+    }
+
+    @PutMapping("missile")
+    @Transactional
+    public ResponseEntity<Object> updateMissile(@RequestBody MissileTypeDTO dto) {
+        missileTypeRepository.save(missileTypeMapper.convert(dto));
+
+        return ResponseEntity.ok("updated");
     }
 }
